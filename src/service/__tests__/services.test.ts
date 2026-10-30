@@ -411,3 +411,20 @@ describe('Base real de Supabase (sin red: cliente falso)', () => {
     expect(routes[0].historicalSpeedsKmh).toHaveLength(3);
   });
 });
+
+describe('El estudiante escanea el QR del bus', () => {
+  it('el primer escaneo lo sube (+1 aforo) y el segundo, en el mismo bus, lo baja', async () => {
+    const app = createApp(() => T0);
+    const subir = await app.passenger.scanUnitQr('user-diego', 'BT-UNIT-9f3c1a72');
+    expect(subir.ok && subir.data.action).toBe('boarded');
+    expect(subir.ok && subir.data.occupancy.occupied).toBe(24);
+    expect((await app.services.passengerService.snapshot('user-diego')).state).toBe('a_bordo');
+
+    // otro bus mientras está a bordo: rechazado
+    expect((await app.passenger.scanUnitQr('user-diego', 'BT-UNIT-27be90d4')).ok).toBe(false);
+
+    const bajar = await app.passenger.scanUnitQr('user-diego', 'BT-UNIT-9f3c1a72');
+    expect(bajar.ok && bajar.data.action).toBe('alighted');
+    expect(bajar.ok && bajar.data.occupancy.occupied).toBe(23);
+  });
+});

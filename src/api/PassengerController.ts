@@ -34,7 +34,7 @@ export class PassengerController {
     return run(() => this.passenger.updatePlan(userId, change));
   }
 
-  // Pase QR
+  // Pase QR (flujo anterior: el conductor escaneaba al estudiante; la UI ya no lo usa)
   issuePass(userId: string): Promise<ApiResult<PassToken>> {
     return run(() => this.boarding.issuePass(userId));
   }

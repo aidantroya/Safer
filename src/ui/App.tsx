@@ -7,12 +7,12 @@ import { DriverLoginPage } from './pages/driver/DriverLoginPage';
 import { DriverPanelPage } from './pages/driver/DriverPanelPage';
 import { DriverProfilePage } from './pages/driver/DriverProfilePage';
 import { AlarmsPage } from './pages/passenger/AlarmsPage';
-import { BoardingPassPage } from './pages/passenger/BoardingPassPage';
 import { HomePage } from './pages/passenger/HomePage';
 import { PassengerLayout } from './pages/passenger/PassengerLayout';
 import { ProfilePage } from './pages/passenger/ProfilePage';
 import { ReportIncidentPage } from './pages/passenger/ReportIncidentPage';
 import { RoutesPage } from './pages/passenger/RoutesPage';
+import { ScanBusPage } from './pages/passenger/ScanBusPage';
 
 export function App() {
   return (
@@ -23,7 +23,8 @@ export function App() {
         <Route path="/pasajero" element={<PassengerLayout />}>
           <Route index element={<HomePage />} />
           <Route path="rutas" element={<RoutesPage />} />
-          <Route path="pase" element={<BoardingPassPage />} />
+          <Route path="escanear" element={<ScanBusPage />} />
+          <Route path="pase" element={<Navigate to="/pasajero/escanear" replace />} />
           <Route path="alertas" element={<AlarmsPage />} />
           <Route path="alertas/reportar" element={<ReportIncidentPage />} />
           <Route path="perfil" element={<ProfilePage />} />

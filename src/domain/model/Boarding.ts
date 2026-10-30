@@ -1,6 +1,6 @@
 /**
- * qr_pase  : el conductor escanea el pase del pasajero (pantalla "Pase de Abordaje")
- * qr_unidad: el pasajero escanea el QR pegado en el bus
+ * qr_pase  : el conductor escanea el pase del pasajero (flujo anterior; la app ya no lo usa)
+ * qr_unidad: el pasajero escanea el QR pegado en el bus (pantalla "Escanear")
  * manual   : el conductor suma +1 sin QR
  * llegada  : se cerró solo porque el bus llegó a la parada de bajada o terminó el viaje
  */

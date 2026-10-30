@@ -5,6 +5,7 @@ import { hasGeo, haversineM, type LatLng } from '@/domain/geo';
 import type { RoutePath } from '@/domain/model';
 import type { DriverPanel, TripSummary } from '@/service/DriverService';
 import { BottomNav, driverNavItems } from '../../components/BottomNav';
+import { BusQrDialog } from '../../components/BusQrDialog';
 import { DevPanel } from '../../components/DevPanel';
 import { Icon } from '../../components/Icon';
 import { LiveMap } from '../../components/LiveMap';
@@ -49,6 +50,7 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
   const me: LatLng | undefined = geo.fix && [geo.fix.lat, geo.fix.lng];
   const [navPath, setNavPath] = useState<RoutePath>();
   const [returnPath, setReturnPath] = useState<RoutePath>();
+  const [showQr, setShowQr] = useState(false);
   const lastReport = useRef(0);
   const lastRoute = useRef<{ at: LatLng; stop: number }>();
 
@@ -280,7 +282,9 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
             <div className="w-12 h-1.5 bg-outline-variant/50 rounded-full mx-auto mb-3" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2"><Icon name="airline_seat_recline_normal" className="text-primary text-[20px]" /><h3 className="text-headline-sm text-on-surface font-bold">Aforo y pasajeros manuales</h3></div>
-              <span className="text-label-sm bg-surface-container-low text-on-surface-variant px-2.5 py-1 rounded-full font-medium border border-outline-variant/30">Sin QR</span>
+              <button type="button" onClick={() => setShowQr(true)} className="text-label-sm bg-surface-container-low text-primary px-2.5 py-1 rounded-full font-bold border border-outline-variant/30 flex items-center gap-1 active:scale-95">
+                <Icon name="qr_code_2" className="text-[16px]" /> QR del bus
+              </button>
             </div>
           </div>
 
@@ -329,6 +333,7 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
           </div>
         </div>
       </main>
+      {showQr && <BusQrDialog bus={bus} onClose={() => setShowQr(false)} />}
       <BottomNav items={driverNavItems} />
       <DevPanel routeId={route.id} onChanged={() => undefined} />
     </div>

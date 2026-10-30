@@ -11,7 +11,7 @@ export interface NavItem {
 const passengerItems: NavItem[] = [
   { to: '/pasajero', label: 'En vivo', icon: 'map', end: true },
   { to: '/pasajero/rutas', label: 'Rutas', icon: 'alt_route' },
-  { to: '/pasajero/pase', label: 'Pase QR', icon: 'qr_code_2' },
+  { to: '/pasajero/escanear', label: 'Escanear', icon: 'qr_code_scanner' },
   { to: '/pasajero/alertas', label: 'Alertas', icon: 'notifications_active' },
   { to: '/pasajero/perfil', label: 'Perfil', icon: 'person' },
 ];

@@ -62,7 +62,7 @@ Regla de dependencias: `ui → api → service → domain ← data`. La UI nunca
 | Ruta | Pantalla |
 |---|---|
 | `/pasajero` | Inicio: mapa, ruta activa, ETA |
-| `/pasajero/pase` | Pase de abordaje (QR dinámico 60 s) |
+| `/pasajero/escanear` | El estudiante escanea el QR pegado en el bus al subir y al bajar |
 | `/pasajero/alertas` | Alarmas "no te duermas" |
 | `/pasajero/alertas/reportar` | Reportar incidencia |
 | `/pasajero/perfil` | Perfil |
@@ -75,7 +75,7 @@ Panel de demo (botón flotante oscuro): velocidad de simulación, acercar el bus
 ## Probar el flujo completo
 
 1. `/` → "Entrar como pasajero". Panel de demo → **Acercar el bus a mi parada de subida** → aparece el aviso de que el bus se acerca.
-2. `/pasajero/pase` → **Simular escaneo (+1/−1)**: el conductor "escanea" tu pase y el aforo sube; el estado pasa a "A bordo".
+2. `/pasajero/escanear` → escanea con la cámara el QR del bus (el conductor lo muestra en **QR del bus**) o usa **Simular QR del Bus**: el aforo sube y el estado pasa a "A bordo"; al bajar se escanea otra vez.
 3. Panel de demo → **Acercar el bus a mi bajada (probar alarma)**: salta la alarma de despertar; al llegar se cierra el abordaje y aparece la reseña.
 4. Pasajero: `/pasajero/rutas` → **Registrar ruta** en otra ruta → el mapa en vivo pasa a mostrar esa ruta y su bus. Cada ruta muestra el conductor de hoy y su calificación.
 5. Conductor: `/conductor` → correo + contraseña → panel con ± de aforo manual y finalizar (mantener 2 s). En **Perfil** (menú inferior) ve las reseñas de su bus.
