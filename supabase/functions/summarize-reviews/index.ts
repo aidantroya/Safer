@@ -4,7 +4,7 @@
 //
 // Secretos (no van en el frontend):
 //   supabase secrets set GEMINI_API_KEY=<tu clave>
-//   supabase secrets set GEMINI_MODEL=gemini-2.5-flash   (opcional)
+//   supabase secrets set GEMINI_MODELS=gemini-flash-lite-latest,gemini-flash-latest   (opcional, en orden de preferencia)
 // Despliegue:
 //   supabase functions deploy summarize-reviews
 
@@ -29,7 +29,9 @@ Deno.serve(async (req) => {
 
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) return json({ error: 'Falta el secreto GEMINI_API_KEY' }, 500);
-  const model = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash';
+  // Si un modelo está saturado o retirado, se prueba el siguiente. Los alias "-latest" siguen al modelo vigente.
+  const models = (Deno.env.get('GEMINI_MODELS') ?? 'gemini-flash-lite-latest,gemini-flash-latest,gemini-3.8-flash')
+    .split(',').map((m) => m.trim()).filter(Boolean);
 
   let driverName = 'Conductor';
   let reviews: ReviewIn[] = [];
@@ -62,10 +64,7 @@ Devuelve:
   comentarios (quejas de seguridad bajan más que quejas de comodidad).
 - summary: una frase de máximo 25 palabras para el coordinador.`;
 
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify({
+  const body = JSON.stringify({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.2,
@@ -80,10 +79,27 @@ Devuelve:
           required: ['keywords', 'score', 'summary'],
         },
       },
-    }),
-  });
+    });
 
-  if (!res.ok) return json({ error: `Gemini respondió ${res.status}`, detail: await res.text() }, 502);
+  let res: Response | undefined;
+  const errors: string[] = [];
+  for (const model of models) {
+    try {
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body,
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) break;
+      errors.push(`${model}: ${res.status} ${(await res.text()).slice(0, 160)}`);
+    } catch (e) {
+      errors.push(`${model}: ${e instanceof Error ? e.message : e}`);
+    }
+    res = undefined;
+  }
+
+  if (!res) return json({ error: 'Gemini no respondió', detail: errors }, 502);
 
   try {
     const data = await res.json();
