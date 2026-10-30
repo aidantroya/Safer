@@ -3,8 +3,10 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { app } from '@/api';
 import { NEGATIVE_TAGS, POSITIVE_TAGS } from '@/service/ReviewService';
 import type { DriverProfile } from '@/service/RouteCatalogService';
+import type { ReviewInsight } from '@/domain/model';
 import { BottomNav, driverNavItems } from '../../components/BottomNav';
 import { Icon } from '../../components/Icon';
+import { InsightCard } from '../../components/InsightCard';
 import { Stars } from '../../components/Stars';
 import { initials } from '../../lib/format';
 import { useSession } from '../../session/SessionContext';
@@ -18,10 +20,12 @@ export function DriverProfilePage() {
   const { user, ready, logout } = useSession();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<DriverProfile>();
+  const [insight, setInsight] = useState<ReviewInsight>();
 
   useEffect(() => {
     if (!user || user.role !== 'driver') return;
     void app.driver.getProfile(user.id).then((r) => r.ok && setProfile(r.data));
+    void app.driver.getInsight(user.id).then((r) => r.ok && setInsight(r.data));
   }, [user]);
 
   if (ready && (!user || user.role !== 'driver')) return <Navigate to="/conductor" replace />;
@@ -64,6 +68,8 @@ export function DriverProfilePage() {
           <p className="text-on-surface-variant text-body-md py-6 text-center">Cargando reseñas…</p>
         ) : (
           <>
+            {insight && <InsightCard insight={insight} title="Lo que dicen de ti" />}
+
             <section aria-labelledby="calificacion" className="bg-surface-card rounded-2xl p-space-md shadow-level-1 border border-outline-variant/30">
               <h2 id="calificacion" className="text-headline-sm text-primary font-bold">Calificación de tu bus</h2>
               <p className="text-body-sm text-on-surface-variant">Promedio de las reseñas que dejaron los estudiantes al bajar.</p>

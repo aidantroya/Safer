@@ -121,3 +121,8 @@
 }
 .ticket-cutout-left { left: -14px; }
 .ticket-cutout-right { right: -14px; }
+
+/* Mapa real en tema oscuro: se invierten sólo las teselas (las líneas y marcadores conservan su color). */
+.map-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6); }
+.map-dark .leaflet-container { background: rgb(var(--surface-bg)); }
+.leaflet-container { font-family: inherit; }

@@ -1,3 +1,5 @@
+import type { GpsFix } from './Navigation';
+
 export type TripStatus = 'en_curso' | 'finalizado';
 
 /** Un viaje = un bus recorriendo una ruta con un conductor. Es la entidad central. */
@@ -15,4 +17,6 @@ export interface Trip {
   avgSpeedMps: number;
   dwellRemainingS: number;
   nextStopIndex: number;
+  /** Presente mientras el conductor comparte su GPS; si falta, la posición la simula la demo. */
+  gps?: GpsFix;
 }

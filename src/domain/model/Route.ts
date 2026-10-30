@@ -4,6 +4,9 @@ export interface Stop {
   order: number;
   /** Metros recorridos desde el inicio de la ruta hasta esta parada. */
   distanceFromStartM: number;
+  /** Coordenadas reales; si todas las paradas las tienen, se usa el mapa real. */
+  lat?: number;
+  lng?: number;
 }
 
 export interface Route {

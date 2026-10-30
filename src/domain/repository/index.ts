@@ -1,6 +1,8 @@
 import type {
-  AlarmPreference, Boarding, Bus, Departure, Incident, IncidentStatus, Review, Route, RouteAssignment, Trip, User,
+  AlarmPreference, Boarding, Bus, Departure, Incident, IncidentStatus, Review, ReviewDigest, ReviewDigestInput, Route, RoutePath, RouteAssignment, Trip,
+  User,
 } from '../model';
+import type { LatLng } from '../geo';
 
 /** Contratos. El dominio sólo conoce estas interfaces; no sabe si detrás hay memoria o Supabase. */
 
@@ -67,4 +69,14 @@ export interface IAssignmentRepository {
   listAll(): Promise<RouteAssignment[]>;
   /** Reemplaza toda la programación de ese día. */
   replaceDay(weekday: number, items: RouteAssignment[]): Promise<void>;
+}
+
+/** Calcula caminos sobre calles reales (hoy OSRM sobre OpenStreetMap). */
+export interface IRoutingService {
+  route(waypoints: LatLng[]): Promise<RoutePath>;
+}
+
+/** Resume reseñas en palabras clave + puntaje. Hoy: Gemini vía Edge Function de Supabase, o un cálculo local. */
+export interface IReviewSummarizer {
+  summarize(input: ReviewDigestInput): Promise<ReviewDigest>;
 }

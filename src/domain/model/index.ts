@@ -7,3 +7,5 @@ export * from './Incident';
 export * from './Review';
 export * from './AlarmPreference';
 export * from './Assignment';
+export * from './ReviewInsight';
+export * from './Navigation';

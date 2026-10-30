@@ -182,15 +182,15 @@ describe('Rutas y perfil del conductor', () => {
 
   it('registrar otra ruta cambia lo que sigue el mapa en vivo', async () => {
     const app = createApp(() => T0);
-    const ok = await app.passenger.selectRoute('user-diego', 'route-7', { boardStopId: 'stop-rectorado', dropStopId: 'stop-universitaria' });
+    const ok = await app.passenger.selectRoute('user-diego', 'route-7', { boardStopId: 'r7-fiec', dropStopId: 'r7-rectorado' });
     expect(ok.ok).toBe(true);
     const s = await app.passenger.getSnapshot('user-diego');
     if (!s.ok) throw new Error(s.error);
     expect(s.data.route.id).toBe('route-7');
-    expect(s.data.boardStop.id).toBe('stop-rectorado');
+    expect(s.data.boardStop.id).toBe('r7-fiec');
     expect(s.data.bus?.number).toBe(21);
 
-    const bad = await app.passenger.selectRoute('user-diego', 'route-2', { boardStopId: 'stop-sureste', dropStopId: 'stop-oeste' });
+    const bad = await app.passenger.selectRoute('user-diego', 'route-2', { boardStopId: 'r2-fadcom', dropStopId: 'r2-fcsh' });
     expect(bad.ok).toBe(false);
   });
 
@@ -291,5 +291,90 @@ describe('Planificador de Coordinación', () => {
     expect((await app.coordinator.saveWeek(broken)).ok).toBe(false);
     const after = await app.coordinator.getWeekPlan();
     expect(after.ok && after.data.assignments).toHaveLength(7);
+  });
+});
+
+describe('Resumen de reseñas (palabras clave + puntaje)', () => {
+  it('sin IA usa las etiquetas más repetidas y el promedio', async () => {
+    const app = createApp(() => T0);
+    const res = await app.driver.getInsight('user-carlos');
+    if (!res.ok || !res.data) throw new Error('sin resumen');
+    expect(res.data.source).toBe('local');
+    expect(res.data.score).toBe(4.6);
+    expect(res.data.keywords[0]).toBe('Puntualidad');
+    expect(res.data.reviewCount).toBe(5);
+  });
+
+  it('usa la IA cuando responde, no la vuelve a llamar sin reseñas nuevas y cae al cálculo local si falla', async () => {
+    let calls = 0;
+    const ok = createApp(() => T0, {
+      summarizer: { summarize: async () => { calls++; return { keywords: ['puntual'], score: 4.8, summary: 'Muy bien.' }; } },
+    });
+    const a = await ok.driver.getInsight('user-ana');
+    await ok.driver.getInsight('user-ana');
+    expect(a.ok && a.data?.source).toBe('gemini');
+    expect(a.ok && a.data?.keywords).toEqual(['puntual']);
+    expect(calls).toBe(1);
+
+    const failing = createApp(() => T0, { summarizer: { summarize: async () => { throw new Error('sin red'); } } });
+    const b = await failing.driver.getInsight('user-ana');
+    expect(b.ok && b.data?.source).toBe('local');
+    expect(b.ok && b.data?.score).toBe(4);
+  });
+
+  it('un conductor sin reseñas no tiene resumen', async () => {
+    const app = createApp(() => T0);
+    const res = await app.coordinator.getDriverInsight('user-jorge');
+    expect(res.ok && res.data).toBeUndefined();
+  });
+});
+
+describe('Mapa real y GPS del conductor', () => {
+  it('la polilínea ubica puntos por distancia y proyecta de vuelta', async () => {
+    const { Polyline } = await import('@/domain/geo');
+    const line = new Polyline([[-2.145, -79.965], [-2.145, -79.960], [-2.140, -79.960]]);
+    expect(line.lengthM).toBeGreaterThan(1000);
+    const p = line.pointAt(400);
+    expect(Math.round(line.project(p).alongM)).toBe(400);
+    expect(line.project(p).offM).toBeLessThan(1);
+  });
+
+  it('el referenciador hace pasar el bus justo por cada parada', async () => {
+    const { Polyline, RouteReferencer, haversineM } = await import('@/domain/geo');
+    const { db } = createApp(() => T0);
+    const route = db.routes[0];
+    const ref = new RouteReferencer(route, new Polyline(route.stops.map((s) => [s.lat!, s.lng!])));
+    for (const s of route.stops) expect(haversineM(ref.toLatLng(s.distanceFromStartM), [s.lat!, s.lng!])).toBeLessThan(1);
+  });
+
+  it('el GPS del conductor avanza el viaje, no lo hace retroceder y se borra al finalizar', async () => {
+    const app = createApp(() => T0);
+    const biblio = app.db.routes[0].stops[3];
+    const moved = await app.driver.reportPosition('trip-1', { lat: biblio.lat!, lng: biblio.lng!, speedMps: 5 });
+    if (!moved.ok) throw new Error(moved.error);
+    expect(Math.abs(moved.data.positionM - biblio.distanceFromStartM)).toBeLessThan(5);
+    expect(moved.data.nextStopIndex).toBe(4);
+
+    // un punto anterior de la ruta no lo regresa
+    const s0 = app.db.routes[0].stops[0];
+    const back = await app.driver.reportPosition('trip-1', { lat: s0.lat!, lng: s0.lng! });
+    expect(back.ok && back.data.positionM).toBeCloseTo(moved.data.positionM, 0);
+
+    // con GPS activo la simulación no lo mueve
+    const before = (await app.services.passengerService.snapshot('user-diego')).trip!.positionM;
+    await app.simulation.tick(60);
+    expect((await app.services.passengerService.snapshot('user-diego')).trip!.positionM).toBe(before);
+    expect((await app.services.passengerService.snapshot('user-diego')).trip!.gps?.lat).toBe(s0.lat);
+
+    const done = await app.driver.finishTrip('trip-1');
+    expect(done.ok && done.data.lastPosition).toEqual([s0.lat, s0.lng]);
+    expect(app.db.trips.find((t) => t.id === 'trip-1')!.gps).toBeUndefined();
+  });
+
+  it('un GPS lejos del trazado no mueve el bus', async () => {
+    const app = createApp(() => T0);
+    const res = await app.driver.reportPosition('trip-1', { lat: -2.19, lng: -79.88 });
+    expect(res.ok && res.data.positionM).toBe(1400);
+    expect(res.ok && res.data.gps!.offRouteM).toBeGreaterThan(250);
   });
 });

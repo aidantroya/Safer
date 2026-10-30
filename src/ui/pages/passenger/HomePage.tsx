@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { app } from '@/api';
 import { Icon } from '../../components/Icon';
+import { hasGeo } from '@/domain/geo';
+import { LiveMap } from '../../components/LiveMap';
 import { RouteMap } from '../../components/RouteMap';
 import { useToasts } from '../../components/Toasts';
 import { fmtClock, fmtEta } from '../../lib/format';
@@ -118,21 +120,35 @@ export function HomePage() {
 
       {/* Área enfocada únicamente en el mapa interactivo y tarjeta de ruta */}
       <main className="relative flex-1 flex flex-col">
-        <RouteMap
-          routeId={route.id}
-          stops={route.stops}
-          busPositionM={state === 'sin_servicio' ? undefined : trip?.positionM}
-          busLabel={bus ? `Bus #${bus.number}` : 'Bus'}
-          boardIndex={boardIndex}
-          dropIndex={dropIndex}
-          onboard={onboard}
-          walkLabel={`(${snap.user.plan!.walkToStopM}m)`}
-          trafficLabel={state === 'sin_servicio' ? undefined : `Tráfico ${traffic.level} • ${traffic.speedKmh} km/h`}
-          heightClass="h-[390px]"
-          showControls={true}
-          controlsPosition="top-right"
-          onRecenter={() => toast('GPS', 'Centrado en el bus.', 'info')}
-        />
+        {hasGeo(route) ? (
+          <LiveMap
+            route={route}
+            busPositionM={state === 'sin_servicio' ? undefined : trip?.positionM}
+            gps={state === 'sin_servicio' ? undefined : trip?.gps}
+            busLabel={bus ? `Bus #${bus.number}${trip?.gps ? ' • GPS' : ''}` : 'Bus'}
+            boardIndex={boardIndex}
+            dropIndex={dropIndex}
+            onboard={onboard}
+            trafficLabel={state === 'sin_servicio' ? undefined : `Tráfico ${traffic.level} • ${traffic.speedKmh} km/h`}
+            heightClass="h-[390px]"
+          />
+        ) : (
+          <RouteMap
+            routeId={route.id}
+            stops={route.stops}
+            busPositionM={state === 'sin_servicio' ? undefined : trip?.positionM}
+            busLabel={bus ? `Bus #${bus.number}` : 'Bus'}
+            boardIndex={boardIndex}
+            dropIndex={dropIndex}
+            onboard={onboard}
+            walkLabel={`(${snap.user.plan!.walkToStopM}m)`}
+            trafficLabel={state === 'sin_servicio' ? undefined : `Tráfico ${traffic.level} • ${traffic.speedKmh} km/h`}
+            heightClass="h-[390px]"
+            showControls={true}
+            controlsPosition="top-right"
+            onRecenter={() => toast('GPS', 'Centrado en el bus.', 'info')}
+          />
+        )}
 
         <div className="px-margin -mt-8 relative z-30 pb-4">
           <article className="bg-surface-card/95 backdrop-blur-md rounded-2xl p-space-md shadow-level-2 border border-outline-variant/40 transition-colors duration-200">

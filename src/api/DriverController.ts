@@ -1,9 +1,11 @@
 import type { Bus, Incident, IncidentType, Route, Trip, User } from '@/domain/model';
 import type { Occupancy } from '@/service/BoardingService';
 import type { BoardingService, ScanOutcome } from '@/service/BoardingService';
-import type { DriverPanel, DriverService, TripSummary } from '@/service/DriverService';
+import type { DriverPanel, DriverService, PositionInput, TripSummary } from '@/service/DriverService';
 import type { IncidentService } from '@/service/IncidentService';
 import type { DriverProfile, RouteCatalogService } from '@/service/RouteCatalogService';
+import type { ReviewInsightService } from '@/service/ReviewInsightService';
+import type { ReviewInsight } from '@/domain/model';
 import { DomainError } from '@/service/errors';
 import { run, type ApiResult } from './ApiResult';
 
@@ -13,6 +15,7 @@ export class DriverController {
     private boarding: BoardingService,
     private incidents: IncidentService,
     private catalog: RouteCatalogService,
+    private insights: ReviewInsightService,
   ) {}
 
   getSetupOptions(): Promise<ApiResult<{ buses: Bus[]; routes: Route[] }>> {
@@ -29,6 +32,9 @@ export class DriverController {
       return p;
     });
   }
+  getInsight(driverId: string): Promise<ApiResult<ReviewInsight | undefined>> {
+    return run(() => this.insights.forDriver(driverId));
+  }
   startTrip(driver: User, busId: string, routeId: string): Promise<ApiResult<Trip>> {
     return run(() => this.driver.startTrip(driver, busId, routeId));
   }
@@ -43,6 +49,13 @@ export class DriverController {
   }
   scanPassenger(tripId: string, token: string): Promise<ApiResult<ScanOutcome>> {
     return run(() => this.boarding.scanPass(tripId, token));
+  }
+  /** El conductor comparte su ubicación (cada pocos segundos mientras maneja). */
+  reportPosition(tripId: string, p: PositionInput): Promise<ApiResult<Trip>> {
+    return run(() => this.driver.reportPosition(tripId, p));
+  }
+  stopSharing(tripId: string): Promise<ApiResult<void>> {
+    return run(() => this.driver.stopSharing(tripId));
   }
   finishTrip(tripId: string): Promise<ApiResult<TripSummary>> {
     return run(() => this.driver.finishTrip(tripId));

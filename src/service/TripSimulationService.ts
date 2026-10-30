@@ -34,6 +34,7 @@ export class TripSimulationService {
   async tick(dtSeconds: number): Promise<void> {
     const active = await this.trips.listActive();
     for (const trip of active) {
+      if (trip.gps) continue; // con GPS real manda el conductor
       const route = await this.routes.findById(trip.routeId);
       if (!route) continue;
       let remaining = dtSeconds;

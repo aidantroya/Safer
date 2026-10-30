@@ -1,4 +1,4 @@
-import type { AlarmPreference, Bus, Departure, PassengerPlan, Route, Stop, Trip, User } from '@/domain/model';
+import type { AlarmPreference, Bus, Departure, GpsFix, PassengerPlan, Route, Stop, Trip, User } from '@/domain/model';
 import type {
   IBoardingRepository, IBusRepository, IReviewRepository, IRouteRepository, ITripRepository, IUserRepository,
 } from '@/domain/repository';
@@ -29,7 +29,7 @@ export interface PassengerSnapshot {
   boardStop: Stop;
   dropStop: Stop;
   state: PassengerState;
-  trip?: { id: string; positionM: number; speedKmh: number; nextStopIndex: number };
+  trip?: { id: string; positionM: number; speedKmh: number; nextStopIndex: number; gps?: GpsFix };
   bus?: Bus;
   occupancy?: Occupancy;
   target?: { stop: Stop; etaSeconds: number; distanceM: number; arrivalAtMs: number; stopsAway: number };
@@ -132,7 +132,7 @@ export class PassengerService {
 
     return {
       user, route, boardStop: route.stops[boardIdx], dropStop: route.stops[dropIdx], state,
-      trip: trip && { id: trip.id, positionM: trip.positionM, speedKmh: Math.round(trip.speedMps * 3.6), nextStopIndex: trip.nextStopIndex },
+      trip: trip && { id: trip.id, positionM: trip.positionM, speedKmh: Math.round(trip.speedMps * 3.6), nextStopIndex: trip.nextStopIndex, gps: trip.gps },
       bus, occupancy,
       target: trip && etaRes && {
         stop: route.stops[targetIdx],

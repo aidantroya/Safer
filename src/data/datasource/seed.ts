@@ -4,8 +4,9 @@ import type { Credential } from './InMemoryDatabase';
 /**
  * Datos de ejemplo alineados con las pantallas:
  * Ruta 4 "Expreso Campus Norte", 6 paradas, Bus #12 (40 asientos), aforo 23/40 (18 QR + 5 manuales).
- * Rutas 2 y 7 con sus propios buses y conductores. Escala del mapa: 10 m por unidad del SVG del home.
- * El trazado de cada ruta en el mapa vive en ui/lib/routeGeometry.ts (mismo id de ruta).
+ * Rutas 2 y 7 con sus propios buses y conductores.
+ * Coordenadas de ejemplo: edificios reales del campus ESPOL (OpenStreetMap). Con ellas se dibuja el mapa real
+ * (Leaflet + OSRM); se reemplazan por las de Supabase al conectar la base.
  */
 export function createSeed(now: number) {
   const route: Route = {
@@ -16,12 +17,12 @@ export function createSeed(now: number) {
     lengthM: 5020,
     frequencyMin: 15,
     stops: [
-      { id: 'stop-sur', name: 'Terminal Sur', order: 1, distanceFromStartM: 150 },
-      { id: 'stop-ciencias', name: 'Fac. Ciencias', order: 2, distanceFromStartM: 1300 },
-      { id: 'stop-rotonda', name: 'Rotonda Central', order: 3, distanceFromStartM: 3270 },
-      { id: 'stop-biblio', name: 'Biblioteca Central', order: 4, distanceFromStartM: 3870 },
-      { id: 'stop-tecno', name: 'Parada Tecnológica', order: 5, distanceFromStartM: 4270 },
-      { id: 'stop-norte', name: 'Terminal Norte', order: 6, distanceFromStartM: 4670 },
+      { id: 'stop-sur', name: 'FADCOM', order: 1, distanceFromStartM: 150, lat: -2.14359, lng: -79.96214 },
+      { id: 'stop-ciencias', name: 'Coliseo Viejo', order: 2, distanceFromStartM: 1300, lat: -2.14508, lng: -79.96416 },
+      { id: 'stop-rotonda', name: 'Rectorado', order: 3, distanceFromStartM: 3270, lat: -2.14765, lng: -79.96446 },
+      { id: 'stop-biblio', name: 'Biblioteca Central', order: 4, distanceFromStartM: 3870, lat: -2.14731, lng: -79.9661 },
+      { id: 'stop-tecno', name: 'FCSH', order: 5, distanceFromStartM: 4270, lat: -2.14717, lng: -79.96785 },
+      { id: 'stop-norte', name: 'FIEC', order: 6, distanceFromStartM: 4670, lat: -2.14453, lng: -79.96803 },
     ],
     // km/h por tramo: inicio→Sur, Sur→Ciencias, Ciencias→Rotonda, Rotonda→Biblio, Biblio→Tecno, Tecno→Norte, Norte→fin
     historicalSpeedsKmh: [30, 26, 22, 16, 20, 24, 18],
@@ -32,15 +33,15 @@ export function createSeed(now: number) {
     code: 2,
     name: 'Ruta 2: Conexión Campus Sur',
     shortName: 'Conexión Campus Sur',
-    lengthM: 4650,
+    lengthM: 3950,
     frequencyMin: 20,
     stops: [
-      { id: 'stop-oeste', name: 'Terminal Oeste', order: 1, distanceFromStartM: 150 },
-      { id: 'stop-residencias', name: 'Residencias', order: 2, distanceFromStartM: 900 },
-      { id: 'stop-cruce-ciencias', name: 'Cruce Ciencias', order: 3, distanceFromStartM: 1380 },
-      { id: 'stop-rotonda-2', name: 'Rotonda Central', order: 4, distanceFromStartM: 2700 },
-      { id: 'stop-hospital', name: 'Hospital Universitario', order: 5, distanceFromStartM: 3600 },
-      { id: 'stop-sureste', name: 'Terminal Sureste', order: 6, distanceFromStartM: 4500 },
+      { id: 'r2-fcsh', name: 'FCSH', order: 1, distanceFromStartM: 100, lat: -2.14717, lng: -79.96785 },
+      { id: 'r2-biblio', name: 'Biblioteca Central', order: 2, distanceFromStartM: 1110, lat: -2.14731, lng: -79.9661 },
+      { id: 'r2-fict', name: 'FICT', order: 3, distanceFromStartM: 2810, lat: -2.14574, lng: -79.96494 },
+      { id: 'r2-fimcp', name: 'FIMCP', order: 4, distanceFromStartM: 3300, lat: -2.14463, lng: -79.96527 },
+      { id: 'r2-coliseo', name: 'Coliseo Viejo', order: 5, distanceFromStartM: 3450, lat: -2.14508, lng: -79.96416 },
+      { id: 'r2-fadcom', name: 'FADCOM', order: 6, distanceFromStartM: 3840, lat: -2.14359, lng: -79.96214 },
     ],
     historicalSpeedsKmh: [28, 24, 20, 22, 18, 24, 20],
   };
@@ -50,15 +51,15 @@ export function createSeed(now: number) {
     code: 7,
     name: 'Ruta 7: Circuito Facultades',
     shortName: 'Circuito Facultades',
-    lengthM: 5470,
+    lengthM: 5450,
     frequencyMin: 12,
     stops: [
-      { id: 'stop-este', name: 'Terminal Este', order: 1, distanceFromStartM: 150 },
-      { id: 'stop-rectorado', name: 'Rectorado', order: 2, distanceFromStartM: 1100 },
-      { id: 'stop-plaza-norte', name: 'Plaza Norte', order: 3, distanceFromStartM: 2000 },
-      { id: 'stop-cruce-norte', name: 'Cruce Ciencias Norte', order: 4, distanceFromStartM: 2620 },
-      { id: 'stop-universitaria', name: 'Av. Universitaria', order: 5, distanceFromStartM: 3520 },
-      { id: 'stop-terminal-sur-7', name: 'Terminal Sur', order: 6, distanceFromStartM: 5320 },
+      { id: 'r7-coliseo-nuevo', name: 'Coliseo Nuevo', order: 1, distanceFromStartM: 100, lat: -2.14198, lng: -79.96722 },
+      { id: 'r7-fiec', name: 'FIEC', order: 2, distanceFromStartM: 917, lat: -2.14453, lng: -79.96803 },
+      { id: 'r7-fcsh', name: 'FCSH', order: 3, distanceFromStartM: 1507, lat: -2.14717, lng: -79.96785 },
+      { id: 'r7-biblio', name: 'Biblioteca Central', order: 4, distanceFromStartM: 2695, lat: -2.14731, lng: -79.9661 },
+      { id: 'r7-rectorado', name: 'Rectorado', order: 5, distanceFromStartM: 3599, lat: -2.14765, lng: -79.96446 },
+      { id: 'r7-coliseo-viejo', name: 'Coliseo Viejo', order: 6, distanceFromStartM: 5345, lat: -2.14508, lng: -79.96416 },
     ],
     historicalSpeedsKmh: [26, 22, 18, 20, 24, 26, 20],
   };
@@ -129,7 +130,7 @@ export function createSeed(now: number) {
     },
     {
       id: 'trip-2', routeId: route2.id, busId: 'bus-18', driverId: 'user-ana', status: 'en_curso',
-      startedAt: now - 8 * 60_000, positionM: 1000, speedMps: 6, avgSpeedMps: 6, dwellRemainingS: 0, nextStopIndex: 2,
+      startedAt: now - 8 * 60_000, positionM: 600, speedMps: 6, avgSpeedMps: 6, dwellRemainingS: 0, nextStopIndex: 1,
     },
     {
       id: 'trip-3', routeId: route7.id, busId: 'bus-21', driverId: 'user-luis', status: 'en_curso',

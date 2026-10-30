@@ -116,7 +116,7 @@ export class RouteCatalogService {
   }
 
   /** Reseñas de los viajes que hizo el conductor (en cualquiera de sus unidades). */
-  private async reviewsFor(driverId: string): Promise<Review[]> {
+  async reviewsFor(driverId: string): Promise<Review[]> {
     const tripIds = new Set((await this.trips.listByDriver(driverId)).map((t) => t.id));
     return (await this.reviews.listAll()).filter((r) => tripIds.has(r.tripId));
   }

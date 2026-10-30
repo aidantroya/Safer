@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { app } from '@/api';
-import type { Route } from '@/domain/model';
+import type { ReviewInsight, Route } from '@/domain/model';
 import { WEEKDAY_NAMES, type PlanItem, type WeekPlan } from '@/service/PlanningService';
 import { Icon } from '../../components/Icon';
+import { InsightCard } from '../../components/InsightCard';
 import { useToasts } from '../../components/Toasts';
 import { haptic } from '../../lib/haptics';
 import { useSession } from '../../session/SessionContext';
@@ -66,6 +67,7 @@ export function PlannerPage() {
   const [mode, setMode] = useState<'dia' | 'semana'>('dia');
   const [day, setDay] = useState<number>();
   const [busy, setBusy] = useState(false);
+  const [insights, setInsights] = useState<Record<string, ReviewInsight>>({});
 
   const load = useCallback(async () => {
     const res = await app.coordinator.getWeekPlan();
@@ -75,6 +77,11 @@ export function PlannerPage() {
     setSaved(d);
     setDraft(d);
     setDay((cur) => cur ?? res.data.today);
+    for (const d of res.data.drivers) {
+      void app.coordinator.getDriverInsight(d.id).then((r) => {
+        if (r.ok && r.data) setInsights((cur) => ({ ...cur, [d.id]: r.data! }));
+      });
+    }
   }, [toast]);
 
   useEffect(() => {
@@ -187,6 +194,21 @@ export function PlannerPage() {
             </button>
           ))}
         </div>
+
+        {mode === 'dia' && Object.keys(insights).length > 0 && (
+          <details className="bg-surface-card rounded-2xl shadow-level-1 border border-outline-variant/30 group">
+            <summary className="list-none cursor-pointer px-3.5 py-3 flex items-center gap-2 text-label-lg font-bold text-on-surface">
+              <Icon name="auto_awesome" className="text-[20px] text-primary" />
+              Desempeño de conductores
+              <Icon name="expand_more" className="ml-auto text-[20px] text-on-surface-variant group-open:rotate-180 transition-transform" />
+            </summary>
+            <ul className="divide-y divide-outline-variant/20 border-t border-outline-variant/20">
+              {plan.drivers.map((d) => insights[d.id] && (
+                <li key={d.id} className="px-3.5 py-3"><InsightCard insight={insights[d.id]} title={d.fullName} compact /></li>
+              ))}
+            </ul>
+          </details>
+        )}
 
         {mode === 'dia' ? (
           <>
