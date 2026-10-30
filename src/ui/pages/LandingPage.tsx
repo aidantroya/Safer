@@ -91,7 +91,7 @@ export function LandingPage() {
               Entrar como coordinador
             </p>
             <p className="text-body-sm text-on-surface-variant truncate">
-              Planifica conductores, buses y rutas
+              Coordinación • coordinacion@bustrack.edu
             </p>
           </div>
           <Icon name="arrow_forward" className="text-on-surface-variant text-[22px] group-hover:translate-x-0.5 transition-transform" />

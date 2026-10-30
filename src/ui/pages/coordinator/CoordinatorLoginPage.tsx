@@ -7,9 +7,12 @@ import { haptic } from '../../lib/haptics';
 import { useSession } from '../../session/SessionContext';
 import { ThemeToggle } from '../../theme/ThemeContext';
 
+const DEMO_EMAIL = 'coordinacion@bustrack.edu';
+const DEMO_PASSWORD = 'coord123';
+
 /**
- * Pantalla "Inicio de sesión de Coordinación".
- * Con Supabase configurado: cuenta real (iniciar sesión o crear cuenta). Sin Supabase: acceso de demo.
+ * Pantalla "Inicio de sesión de Coordinación". Viene rellena con la cuenta de demo (entrada rápida);
+ * con Supabase configurado, cualquier otra cuenta entra con Supabase Auth, y se puede crear una cuenta real.
  */
 export function CoordinatorLoginPage() {
   const { loginCoordinator, loginRemote, signUpRemote } = useSession();
@@ -18,8 +21,16 @@ export function CoordinatorLoginPage() {
   const real = !!supabase;
   const [tab, setTab] = useState<'entrar' | 'crear'>('entrar');
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState(real ? '' : 'coordinacion@bustrack.edu');
-  const [password, setPassword] = useState(real ? '' : 'coord123');
+  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const isDemoAccount = email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD;
+
+  const switchTab = (t: 'entrar' | 'crear') => {
+    setTab(t);
+    // crear cuenta empieza en blanco; al volver a "Iniciar sesión" se rellena otra vez la demo
+    setEmail(t === 'crear' ? '' : DEMO_EMAIL);
+    setPassword(t === 'crear' ? '' : DEMO_PASSWORD);
+  };
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -32,25 +43,19 @@ export function CoordinatorLoginPage() {
     setBusy(true);
     haptic.medium();
     let err: string | undefined;
-    if (!real) err = await loginCoordinator(email, password);
+    if (!real || (tab === 'entrar' && isDemoAccount)) err = await loginCoordinator(email, password);
     else if (tab === 'entrar') err = await loginRemote(email, password);
     else {
       const r = await signUpRemote(fullName, email, password);
       if (r === 'confirmar_correo') {
         setBusy(false);
-        setTab('entrar');
+        switchTab('entrar');
         return toast('Cuenta creada', 'Te enviamos un correo para confirmarla. Después inicia sesión.', 'ok');
       }
       err = r;
     }
     setBusy(false);
     if (err) return toast(tab === 'crear' ? 'No se pudo crear la cuenta' : 'No se pudo iniciar sesión', err, 'warn');
-    done();
-  };
-
-  const demo = async () => {
-    const err = await loginCoordinator('coordinacion@bustrack.edu', 'coord123');
-    if (err) return toast('Error', err, 'warn');
     done();
   };
 
@@ -97,7 +102,7 @@ export function CoordinatorLoginPage() {
                 type="button"
                 role="tab"
                 aria-selected={tab === t}
-                onClick={() => setTab(t)}
+                onClick={() => switchTab(t)}
                 className={`min-h-[40px] rounded-xl text-label-lg transition-all ${tab === t ? 'bg-surface-card text-primary font-bold shadow-level-1' : 'text-on-surface-variant font-medium'}`}
               >
                 {label}
@@ -140,7 +145,7 @@ export function CoordinatorLoginPage() {
           <div>
             <div className="flex justify-between items-center mb-1">
               <label htmlFor="coord-password" className="text-label-sm text-on-surface-variant font-medium">Contraseña</label>
-              {!real && <span className="text-label-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Demo: coord123</span>}
+              {tab === 'entrar' && <span className="text-label-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Demo: {DEMO_PASSWORD}</span>}
             </div>
             <div className="relative flex items-center">
               <Icon name="lock" className="absolute left-3.5 text-on-surface-variant/60 text-[20px] pointer-events-none" />
@@ -175,10 +180,12 @@ export function CoordinatorLoginPage() {
           <Icon name="arrow_forward" className="text-[20px]" />
         </button>
 
-        {real && (
-          <button type="button" onClick={demo} className="w-full h-10 rounded-full text-on-surface-variant text-label-md font-semibold hover:bg-surface-container-low">
-            Entrar en modo demo (datos de ejemplo)
-          </button>
+        {real && tab === 'entrar' && (
+          <p className="text-center text-label-sm text-on-surface-variant">
+            {isDemoAccount
+              ? 'Cuenta de demo (datos de ejemplo). Escribe tu correo para entrar con la base real.'
+              : 'Entrarás con tu cuenta real de Supabase.'}
+          </p>
         )}
       </form>
 
