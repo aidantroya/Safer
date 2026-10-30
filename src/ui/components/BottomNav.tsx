@@ -10,15 +10,20 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav aria-label="Navegación principal" className="fixed bottom-0 inset-x-0 mx-auto max-w-md z-50 flex justify-around items-center px-margin py-2 bg-surface-card shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
+    <nav
+      aria-label="Navegación principal"
+      className="fixed bottom-0 inset-x-0 mx-auto max-w-md z-50 flex justify-around items-center px-margin py-2 bg-surface-card border-t border-outline-variant/30 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] transition-colors duration-200"
+    >
       {items.map((it) => (
         <NavLink
           key={it.to}
           to={it.to}
           end={it.end}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center rounded-xl py-1 px-3 min-w-[64px] min-h-[44px] active:scale-[0.985] transition-transform duration-150 ${
-              isActive ? 'bg-secondary-container text-on-secondary-container font-semibold' : 'text-on-surface-variant hover:bg-surface-container-low'
+            `flex flex-col items-center justify-center rounded-2xl py-1 px-3 min-w-[64px] min-h-[44px] active:scale-[0.985] transition-all duration-150 ${
+              isActive
+                ? 'bg-primary text-white font-bold shadow-xs'
+                : 'text-on-surface-variant hover:bg-surface-container-low font-medium'
             }`
           }
         >

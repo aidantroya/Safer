@@ -6,13 +6,16 @@ import { HashRouter } from 'react-router-dom';
 import './index.css';
 import { App } from './ui/App';
 import { SessionProvider } from './ui/session/SessionContext';
+import { ThemeProvider } from './ui/theme/ThemeContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
-      <SessionProvider>
-        <App />
-      </SessionProvider>
+      <ThemeProvider>
+        <SessionProvider>
+          <App />
+        </SessionProvider>
+      </ThemeProvider>
     </HashRouter>
   </StrictMode>,
 );

@@ -1,29 +1,55 @@
-/** Tokens tomados de DESIGN.md ("BusTrack Institutional UI") y de los exports de Stitch. */
+function withOpacity(variableName) {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgb(var(${variableName}) / ${opacityValue})`;
+    }
+    return `rgb(var(${variableName}))`;
+  };
+}
+
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        'on-surface': '#191b23', 'surface-container': '#ededf9', 'inverse-on-surface': '#f0f0fb',
-        'surface-bright': '#faf8ff', 'on-secondary-fixed': '#002114', 'on-error': '#ffffff',
-        'on-error-container': '#93000a', 'secondary-fixed-dim': '#68dba9', 'surface-tint': '#0053db',
-        background: '#faf8ff', 'on-tertiary-fixed-variant': '#7d2d00', 'inverse-primary': '#b4c5ff',
-        'primary-container': '#2563eb', 'on-secondary-container': '#00714e', 'tertiary-fixed': '#ffdbcd',
-        outline: '#737686', 'primary-fixed': '#dbe1ff', 'on-tertiary-container': '#ffede6',
-        'on-secondary-fixed-variant': '#005137', 'on-primary-fixed-variant': '#003ea8', 'on-tertiary': '#ffffff',
-        'surface-variant': '#e1e2ed', 'on-tertiary-fixed': '#360f00', 'surface-container-low': '#f3f3fe',
-        'on-primary-fixed': '#00174b', 'error-container': '#ffdad6', 'on-background': '#191b23',
-        'tertiary-fixed-dim': '#ffb596', 'surface-container-lowest': '#ffffff', 'secondary-container': '#82f5c1',
-        'outline-variant': '#c3c6d7', 'alert-coral': '#EF4444', 'inverse-surface': '#2e3039', error: '#ba1a1a',
-        'on-secondary': '#ffffff', 'text-main': '#1F2937', primary: '#004ac6', 'surface-container-high': '#e7e7f3',
-        secondary: '#006c4a', 'secondary-fixed': '#85f8c4', surface: '#faf8ff', 'text-muted': '#6B7280',
-        'tertiary-container': '#bc4800', 'on-primary': '#ffffff', 'surface-bg': '#F4F6F8', 'surface-card': '#FFFFFF',
-        'primary-fixed-dim': '#b4c5ff', 'on-surface-variant': '#434655', tertiary: '#943700',
-        'surface-container-highest': '#e1e2ed', 'on-primary-container': '#eeefff', 'surface-dim': '#d9d9e5',
+        'surface-bg': withOpacity('--surface-bg'),
+        'surface-card': withOpacity('--surface-card'),
+        'surface-container-lowest': withOpacity('--surface-container-lowest'),
+        'surface-container-low': withOpacity('--surface-container-low'),
+        'surface-container': withOpacity('--surface-container'),
+        'surface-container-high': withOpacity('--surface-container-high'),
+        'surface-container-highest': withOpacity('--surface-container-highest'),
+        'surface-variant': withOpacity('--surface-variant'),
+        'surface': withOpacity('--surface'),
+        'primary': withOpacity('--primary'),
+        'primary-container': withOpacity('--primary-container'),
+        'primary-fixed': withOpacity('--primary-fixed'),
+        'on-primary': withOpacity('--on-primary'),
+        'on-primary-container': withOpacity('--on-primary-container'),
+        'on-surface': withOpacity('--on-surface'),
+        'on-surface-variant': withOpacity('--on-surface-variant'),
+        'outline': withOpacity('--outline'),
+        'outline-variant': withOpacity('--outline-variant'),
+        'secondary': withOpacity('--secondary'),
+        'secondary-container': withOpacity('--secondary-container'),
+        'on-secondary-container': withOpacity('--on-secondary-container'),
+        'text-main': withOpacity('--text-main'),
+        'text-muted': withOpacity('--text-muted'),
+        'alert-coral': withOpacity('--alert-coral'),
+        'brand-navy': '#112240',
+        'brand-cream': '#F8F6F0',
       },
-      // Igual que los exports de Stitch (OJO: rounded-xl = 3rem; en HomePage se usan radios explícitos).
       borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
-      spacing: { 'space-xl': '32px', gutter: '16px', margin: '20px', 'space-sm': '8px', 'space-md': '16px', 'space-lg': '24px', 'space-xs': '4px' },
+      spacing: {
+        'space-xl': '32px',
+        gutter: '16px',
+        margin: '20px',
+        'space-sm': '8px',
+        'space-md': '16px',
+        'space-lg': '24px',
+        'space-xs': '4px',
+      },
       fontFamily: { sans: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'] },
       fontSize: {
         'headline-md': ['24px', { lineHeight: '32px', fontWeight: '700' }],

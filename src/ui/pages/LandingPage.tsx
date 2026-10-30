@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
 import { useToasts } from '../components/Toasts';
 import { useSession } from '../session/SessionContext';
+import { ThemeToggle } from '../theme/ThemeContext';
 
-/** Entrada de desarrollo (no viene de Stitch): elige con qué rol probar la demo. */
+/** Pantalla de Bienvenida y Selección de Rol (SAFER Transit). */
 export function LandingPage() {
   const { loginPassenger } = useSession();
   const { toast } = useToasts();
@@ -16,23 +17,73 @@ export function LandingPage() {
   };
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-margin flex flex-col justify-center gap-6">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-primary-container mx-auto flex items-center justify-center text-white shadow-sm"><Icon name="directions_bus" fill className="text-[34px]" /></div>
-        <h1 className="text-headline-lg text-text-main mt-4">BusTrack</h1>
-        <p className="text-body-md text-text-muted mt-1">Trazabilidad y aforo de buses institucionales</p>
+    <main className="min-h-screen max-w-md mx-auto px-margin py-8 flex flex-col justify-between gap-6 bg-surface-bg transition-colors duration-200">
+      {/* Barra superior con selector de tema */}
+      <div className="w-full flex justify-end">
+        <ThemeToggle showLabel />
       </div>
-      <button type="button" onClick={asPassenger} className="bg-white rounded-3xl p-5 shadow-soft flex items-center gap-4 text-left active:scale-[0.985] transition-transform border border-outline-variant/30">
-        <div className="w-12 h-12 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center"><Icon name="person" fill /></div>
-        <div className="flex-1"><p className="text-title-md font-bold">Entrar como pasajero</p><p className="text-body-sm text-text-muted">Diego • diego@espol.edu.ec</p></div>
-        <Icon name="arrow_forward" className="text-outline" />
-      </button>
-      <button type="button" onClick={() => navigate('/conductor')} className="bg-white rounded-3xl p-5 shadow-soft flex items-center gap-4 text-left active:scale-[0.985] transition-transform border border-outline-variant/30">
-        <div className="w-12 h-12 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center"><Icon name="badge" fill /></div>
-        <div className="flex-1"><p className="text-title-md font-bold">Entrar como conductor</p><p className="text-body-sm text-text-muted">Carlos • PIN 4821</p></div>
-        <Icon name="arrow_forward" className="text-outline" />
-      </button>
-      <p className="text-label-sm text-text-muted text-center">Demo con datos simulados en memoria. Las dos vistas comparten el mismo bus mientras no recargues la pestaña.</p>
+
+      <div className="flex flex-col items-center text-center -mt-4">
+        {/* Logo SAFER */}
+        <div className="w-48 max-w-xs bg-white rounded-3xl p-3 shadow-level-1 border border-outline-variant/40 mb-4 flex items-center justify-center">
+          <img src="/logo-safer.jpg" alt="SAFER Transit" className="w-full h-auto object-contain rounded-xl" />
+        </div>
+        <span className="text-label-md text-primary font-bold tracking-widest uppercase">
+          Trazabilidad y Aforo en Tiempo Real
+        </span>
+        <h1 className="text-headline-lg text-on-surface font-extrabold mt-1 tracking-tight">
+          Bienvenido a SAFER
+        </h1>
+        <p className="text-body-md text-on-surface-variant mt-1.5 max-w-xs leading-relaxed">
+          Selecciona tu rol para acceder a la plataforma institucional de transporte
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3.5 w-full">
+        <button
+          type="button"
+          onClick={asPassenger}
+          className="bg-surface-card rounded-3xl p-5 shadow-level-1 flex items-center gap-4 text-left active:scale-[0.985] transition-all border border-outline-variant/40 hover:border-primary/50 group"
+        >
+          <div className="w-13 h-13 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+            <Icon name="person" className="text-[26px]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
+              Entrar como pasajero
+            </p>
+            <p className="text-body-sm text-on-surface-variant truncate">
+              Diego • diego@espol.edu.ec
+            </p>
+          </div>
+          <Icon name="arrow_forward" className="text-on-surface-variant text-[22px] group-hover:translate-x-0.5 transition-transform" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/conductor')}
+          className="bg-surface-card rounded-3xl p-5 shadow-level-1 flex items-center gap-4 text-left active:scale-[0.985] transition-all border border-outline-variant/40 hover:border-primary/50 group"
+        >
+          <div className="w-13 h-13 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+            <Icon name="badge" className="text-[26px]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
+              Entrar como conductor
+            </p>
+            <p className="text-body-sm text-on-surface-variant truncate">
+              Carlos • PIN rápido: 4821
+            </p>
+          </div>
+          <Icon name="arrow_forward" className="text-on-surface-variant text-[22px] group-hover:translate-x-0.5 transition-transform" />
+        </button>
+      </div>
+
+      <footer className="text-center pt-2">
+        <p className="text-label-sm text-on-surface-variant/80">
+          Coordinación de Transporte • Turnos sincronizados en vivo
+        </p>
+      </footer>
     </main>
   );
 }

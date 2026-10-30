@@ -3,8 +3,77 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* TEMA CLARO: Paleta SAFER (Azul Marino + Crema Suave) */
+    --primary: 17 34 64;               /* #112240 Azul oscuro SAFER */
+    --primary-container: 26 54 93;     /* #1A365D Azul marino botón */
+    --primary-fixed: 226 232 240;      /* #E2E8F0 */
+    --on-primary: 255 255 255;
+    --on-primary-container: 255 255 255;
+
+    --surface-bg: 248 246 240;         /* #F8F6F0 Crema suave */
+    --surface-card: 255 255 255;       /* #FFFFFF Blanco nítido */
+    --surface-container-lowest: 255 255 255;
+    --surface-container-low: 242 239 231; /* #F2EFE7 Crema soporte */
+    --surface-container: 235 230 220;     /* #EBE6DC */
+    --surface-container-high: 226 220 208;
+    --surface-container-highest: 216 209 196;
+    --surface-variant: 235 230 220;
+    --surface: 248 246 240;
+
+    --on-surface: 15 23 42;            /* #0F172A */
+    --on-surface-variant: 71 85 105;   /* #475569 */
+    --text-main: 15 23 42;
+    --text-muted: 100 116 139;
+
+    --outline: 148 163 184;            /* #94A3B8 */
+    --outline-variant: 203 213 225;    /* #CBD5E1 */
+
+    --secondary: 13 148 136;           /* #0D9488 Esmeralda suave */
+    --secondary-container: 204 251 241;/* #CCFBF1 */
+    --on-secondary-container: 17 94 89;
+
+    --alert-coral: 239 68 68;          /* #EF4444 */
+  }
+
+  .dark {
+    /* TEMA OSCURO: Paleta SAFER Nocturna (Azul Marino Profundo + Crema Luminoso) */
+    --primary: 147 197 253;            /* #93C5FD Azul cielo suave */
+    --primary-container: 37 99 235;    /* #2563EB Azul activo */
+    --primary-fixed: 30 41 59;         /* #1E293B */
+    --on-primary: 255 255 255;
+    --on-primary-container: 255 255 255;
+
+    --surface-bg: 10 17 32;            /* #0A1120 Azul marino oscuro de fondo */
+    --surface-card: 19 29 51;          /* #131D33 Tarjeta oscura */
+    --surface-container-lowest: 15 23 42;  /* #0F172A */
+    --surface-container-low: 23 35 61;     /* #17233D */
+    --surface-container: 31 46 77;         /* #1F2E4D */
+    --surface-container-high: 40 58 94;    /* #283A5E */
+    --surface-container-highest: 48 70 110;
+    --surface-variant: 31 46 77;
+    --surface: 15 23 42;
+
+    --on-surface: 248 246 240;         /* #F8F6F0 Crema suave */
+    --on-surface-variant: 148 163 184; /* #94A3B8 */
+    --text-main: 248 246 240;
+    --text-muted: 148 163 184;
+
+    --outline: 100 116 139;
+    --outline-variant: 51 65 85;       /* #334155 */
+
+    --secondary: 45 212 191;           /* #2DD4BF */
+    --secondary-container: 19 78 74;   /* #134E4A */
+    --on-secondary-container: 153 246 228;
+
+    --alert-coral: 248 113 113;        /* #F87171 */
+  }
+
   html, body, #root { min-height: 100%; }
-  body { @apply bg-surface-bg text-on-surface font-sans antialiased; -webkit-tap-highlight-color: transparent; }
+  body { 
+    @apply bg-surface-bg text-on-surface font-sans antialiased transition-colors duration-200; 
+    -webkit-tap-highlight-color: transparent; 
+  }
 }
 
 .material-symbols-outlined {
@@ -48,7 +117,7 @@
 }
 
 .ticket-cutout-left, .ticket-cutout-right {
-  position: absolute; width: 28px; height: 28px; border-radius: 9999px; background-color: #F4F6F8; border: 1px solid #e2e8f0;
+  position: absolute; width: 28px; height: 28px; border-radius: 9999px; background-color: var(--surface-bg); border: 1px solid var(--outline-variant);
 }
 .ticket-cutout-left { left: -14px; }
 .ticket-cutout-right { right: -14px; }
