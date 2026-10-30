@@ -1,0 +1,51 @@
+/** Tokens tomados de DESIGN.md ("BusTrack Institutional UI") y de los exports de Stitch. */
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        'on-surface': '#191b23', 'surface-container': '#ededf9', 'inverse-on-surface': '#f0f0fb',
+        'surface-bright': '#faf8ff', 'on-secondary-fixed': '#002114', 'on-error': '#ffffff',
+        'on-error-container': '#93000a', 'secondary-fixed-dim': '#68dba9', 'surface-tint': '#0053db',
+        background: '#faf8ff', 'on-tertiary-fixed-variant': '#7d2d00', 'inverse-primary': '#b4c5ff',
+        'primary-container': '#2563eb', 'on-secondary-container': '#00714e', 'tertiary-fixed': '#ffdbcd',
+        outline: '#737686', 'primary-fixed': '#dbe1ff', 'on-tertiary-container': '#ffede6',
+        'on-secondary-fixed-variant': '#005137', 'on-primary-fixed-variant': '#003ea8', 'on-tertiary': '#ffffff',
+        'surface-variant': '#e1e2ed', 'on-tertiary-fixed': '#360f00', 'surface-container-low': '#f3f3fe',
+        'on-primary-fixed': '#00174b', 'error-container': '#ffdad6', 'on-background': '#191b23',
+        'tertiary-fixed-dim': '#ffb596', 'surface-container-lowest': '#ffffff', 'secondary-container': '#82f5c1',
+        'outline-variant': '#c3c6d7', 'alert-coral': '#EF4444', 'inverse-surface': '#2e3039', error: '#ba1a1a',
+        'on-secondary': '#ffffff', 'text-main': '#1F2937', primary: '#004ac6', 'surface-container-high': '#e7e7f3',
+        secondary: '#006c4a', 'secondary-fixed': '#85f8c4', surface: '#faf8ff', 'text-muted': '#6B7280',
+        'tertiary-container': '#bc4800', 'on-primary': '#ffffff', 'surface-bg': '#F4F6F8', 'surface-card': '#FFFFFF',
+        'primary-fixed-dim': '#b4c5ff', 'on-surface-variant': '#434655', tertiary: '#943700',
+        'surface-container-highest': '#e1e2ed', 'on-primary-container': '#eeefff', 'surface-dim': '#d9d9e5',
+      },
+      // Igual que los exports de Stitch (OJO: rounded-xl = 3rem; en HomePage se usan radios explícitos).
+      borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+      spacing: { 'space-xl': '32px', gutter: '16px', margin: '20px', 'space-sm': '8px', 'space-md': '16px', 'space-lg': '24px', 'space-xs': '4px' },
+      fontFamily: { sans: ['"Inter Variable"', 'Inter', 'system-ui', 'sans-serif'] },
+      fontSize: {
+        'headline-md': ['24px', { lineHeight: '32px', fontWeight: '700' }],
+        'headline-lg': ['32px', { lineHeight: '40px', fontWeight: '800' }],
+        'display-eta': ['48px', { lineHeight: '48px', fontWeight: '900' }],
+        'metric-display': ['32px', { lineHeight: '36px', letterSpacing: '-0.03em', fontWeight: '800' }],
+        'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '22px', fontWeight: '600' }],
+        'label-sm': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', fontWeight: '600' }],
+        'label-lg': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+      },
+      boxShadow: {
+        'level-1': '0 4px 12px -2px rgba(15,23,42,.06), 0 2px 4px -1px rgba(15,23,42,.04)',
+        'level-2': '0 12px 24px -4px rgba(15,23,42,.10), 0 4px 8px -2px rgba(15,23,42,.04)',
+        'level-3': '0 20px 32px -8px rgba(15,23,42,.16)',
+        soft: '0 10px 25px rgba(0,0,0,.05)',
+      },
+    },
+  },
+  plugins: [],
+};
