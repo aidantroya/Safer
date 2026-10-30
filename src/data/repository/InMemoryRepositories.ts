@@ -168,4 +168,7 @@ export class InMemoryAssignmentRepository implements IAssignmentRepository {
   async replaceDay(weekday: number, items: RouteAssignment[]): Promise<void> {
     this.db.assignments = [...this.db.assignments.filter((a) => a.weekday !== weekday), ...items.map((a) => ({ ...a, weekday }))];
   }
+  async replaceDays(days: { weekday: number; items: RouteAssignment[] }[]): Promise<void> {
+    for (const d of days) await this.replaceDay(d.weekday, d.items);
+  }
 }

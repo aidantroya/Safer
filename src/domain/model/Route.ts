@@ -11,7 +11,8 @@ export interface Stop {
 
 export interface Route {
   id: string;
-  code: number;
+  /** Número o código visible de la ruta ("4", "R-12"…). */
+  code: number | string;
   name: string; // "Ruta 4: Expreso Campus Norte"
   shortName: string; // "Expreso Campus Norte"
   lengthM: number;

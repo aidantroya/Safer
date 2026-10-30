@@ -1,29 +1,57 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/data/datasource/supabaseClient';
 import { Icon } from '../../components/Icon';
 import { useToasts } from '../../components/Toasts';
 import { haptic } from '../../lib/haptics';
 import { useSession } from '../../session/SessionContext';
 import { ThemeToggle } from '../../theme/ThemeContext';
 
-/** Pantalla "Inicio de sesión de Coordinación". */
+/**
+ * Pantalla "Inicio de sesión de Coordinación".
+ * Con Supabase configurado: cuenta real (iniciar sesión o crear cuenta). Sin Supabase: acceso de demo.
+ */
 export function CoordinatorLoginPage() {
-  const { loginCoordinator } = useSession();
+  const { loginCoordinator, loginRemote, signUpRemote } = useSession();
   const { toast } = useToasts();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('coordinacion@bustrack.edu');
-  const [password, setPassword] = useState('coord123');
+  const real = !!supabase;
+  const [tab, setTab] = useState<'entrar' | 'crear'>('entrar');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState(real ? '' : 'coordinacion@bustrack.edu');
+  const [password, setPassword] = useState(real ? '' : 'coord123');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const done = () => {
+    haptic.success();
+    navigate('/coordinador/planificador');
+  };
 
   const submit = async () => {
     setBusy(true);
     haptic.medium();
-    const err = await loginCoordinator(email, password);
+    let err: string | undefined;
+    if (!real) err = await loginCoordinator(email, password);
+    else if (tab === 'entrar') err = await loginRemote(email, password);
+    else {
+      const r = await signUpRemote(fullName, email, password);
+      if (r === 'confirmar_correo') {
+        setBusy(false);
+        setTab('entrar');
+        return toast('Cuenta creada', 'Te enviamos un correo para confirmarla. Después inicia sesión.', 'ok');
+      }
+      err = r;
+    }
     setBusy(false);
-    if (err) return toast('Credenciales inválidas', err, 'warn');
-    haptic.success();
-    navigate('/coordinador/planificador');
+    if (err) return toast(tab === 'crear' ? 'No se pudo crear la cuenta' : 'No se pudo iniciar sesión', err, 'warn');
+    done();
+  };
+
+  const demo = async () => {
+    const err = await loginCoordinator('coordinacion@bustrack.edu', 'coord123');
+    if (err) return toast('Error', err, 'warn');
+    done();
   };
 
   const field =
@@ -50,7 +78,7 @@ export function CoordinatorLoginPage() {
         <span className="text-label-md text-primary font-bold tracking-widest uppercase">Portal Coordinación • SAFER</span>
         <h1 className="text-headline-md text-on-surface font-extrabold tracking-tight mt-1">Planificación de turnos</h1>
         <p className="text-body-sm text-on-surface-variant max-w-xs mt-1">
-          Asigna conductores y buses a cada ruta, por día o para toda la semana.
+          Asigna conductores y buses a las rutas reales, por día o para toda la semana.
         </p>
       </header>
 
@@ -61,33 +89,66 @@ export function CoordinatorLoginPage() {
         }}
         className="w-full bg-surface-card rounded-3xl shadow-level-2 border border-outline-variant/30 p-5 sm:p-6 flex flex-col gap-4"
       >
+        {real && (
+          <div role="tablist" aria-label="Cuenta" className="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+            {([['entrar', 'Iniciar sesión'], ['crear', 'Crear cuenta']] as const).map(([t, label]) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => setTab(t)}
+                className={`min-h-[40px] rounded-xl text-label-lg transition-all ${tab === t ? 'bg-surface-card text-primary font-bold shadow-level-1' : 'text-on-surface-variant font-medium'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
-          <legend className="text-label-lg text-on-surface font-bold mb-1 flex items-center gap-1.5">
-            <Icon name="calendar_month" className="text-[20px] text-primary" />
-            Iniciar sesión
-          </legend>
+          <legend className="sr-only">{tab === 'crear' ? 'Crear cuenta' : 'Iniciar sesión'}</legend>
+
+          {real && tab === 'crear' && (
+            <div>
+              <label htmlFor="coord-name" className="text-label-sm text-on-surface-variant font-medium block mb-1">Nombre completo</label>
+              <div className="relative flex items-center">
+                <Icon name="person" className="absolute left-3.5 text-on-surface-variant/60 text-[20px] pointer-events-none" />
+                <input id="coord-name" autoComplete="name" className={field} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              </div>
+            </div>
+          )}
 
           <div>
             <label htmlFor="coord-email" className="text-label-sm text-on-surface-variant font-medium block mb-1">
-              Correo institucional
+              {real && tab === 'entrar' ? 'Correo o usuario' : 'Correo institucional'}
             </label>
             <div className="relative flex items-center">
               <Icon name="alternate_email" className="absolute left-3.5 text-on-surface-variant/60 text-[20px] pointer-events-none" />
-              <input id="coord-email" type="email" autoComplete="username" className={field} value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input
+                id="coord-email"
+                type={real && tab === 'entrar' ? 'text' : 'email'}
+                autoComplete="username"
+                className={field}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
               <label htmlFor="coord-password" className="text-label-sm text-on-surface-variant font-medium">Contraseña</label>
-              <span className="text-label-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Demo: coord123</span>
+              {!real && <span className="text-label-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Demo: coord123</span>}
             </div>
             <div className="relative flex items-center">
               <Icon name="lock" className="absolute left-3.5 text-on-surface-variant/60 text-[20px] pointer-events-none" />
               <input
                 id="coord-password"
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
+                autoComplete={tab === 'crear' ? 'new-password' : 'current-password'}
+                minLength={tab === 'crear' ? 6 : undefined}
                 className={`${field} pr-12`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -107,16 +168,24 @@ export function CoordinatorLoginPage() {
 
         <button
           type="submit"
-          disabled={busy || !email || !password}
+          disabled={busy || !email || !password || (real && tab === 'crear' && !fullName.trim())}
           className="w-full py-3.5 px-4 rounded-2xl bg-primary text-on-primary hover:opacity-95 active:scale-[0.985] text-label-lg font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
         >
-          <span>{busy ? 'Ingresando…' : 'Abrir planificador'}</span>
+          <span>{busy ? 'Un momento…' : real && tab === 'crear' ? 'Crear cuenta' : 'Abrir planificador'}</span>
           <Icon name="arrow_forward" className="text-[20px]" />
         </button>
+
+        {real && (
+          <button type="button" onClick={demo} className="w-full h-10 rounded-full text-on-surface-variant text-label-md font-semibold hover:bg-surface-container-low">
+            Entrar en modo demo (datos de ejemplo)
+          </button>
+        )}
       </form>
 
       <footer className="w-full text-center py-3">
-        <p className="text-label-sm text-on-surface-variant/80">Coordinación de Transporte • SAFER</p>
+        <p className="text-label-sm text-on-surface-variant/80">
+          {real ? 'Cuenta real de Supabase • Coordinación de Transporte' : 'Coordinación de Transporte • SAFER'}
+        </p>
       </footer>
     </main>
   );

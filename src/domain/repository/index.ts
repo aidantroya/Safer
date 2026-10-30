@@ -69,6 +69,8 @@ export interface IAssignmentRepository {
   listAll(): Promise<RouteAssignment[]>;
   /** Reemplaza toda la programación de ese día. */
   replaceDay(weekday: number, items: RouteAssignment[]): Promise<void>;
+  /** Reemplaza varios días de una vez (o todo o nada). */
+  replaceDays(days: { weekday: number; items: RouteAssignment[] }[]): Promise<void>;
 }
 
 /** Calcula caminos sobre calles reales (hoy OSRM sobre OpenStreetMap). */

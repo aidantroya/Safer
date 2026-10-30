@@ -378,3 +378,36 @@ describe('Mapa real y GPS del conductor', () => {
     expect(res.ok && res.data.gps!.offRouteM).toBeGreaterThan(250);
   });
 });
+
+describe('Base real de Supabase (sin red: cliente falso)', () => {
+  it('lee puntos PostGIS en GeoJSON y en EWKB', async () => {
+    const { parsePoint } = await import('@/data/remote/postgis');
+    expect(parsePoint({ type: 'Point', coordinates: [-79.9661, -2.14731] })).toEqual([-2.14731, -79.9661]);
+    const [lat, lng] = parsePoint('0101000020e6100000992a1895d4fd53c076fd82ddb02d01c0')!;
+    expect(lat).toBeCloseTo(-2.14731, 5);
+    expect(lng).toBeCloseTo(-79.9661, 4);
+    expect(parsePoint(null)).toBeUndefined();
+  });
+
+  it('convierte las filas de routes y stops al modelo de la app y oculta las inactivas', async () => {
+    const { SupabaseRouteRepository } = await import('@/data/repository/SupabaseRepositories');
+    const tables: Record<string, unknown[]> = {
+      routes: [
+        { id: 'r1', code: '4', name: 'Ruta 4: Norte', short_name: 'Norte', length_m: 3000, frequency_min: 10, active: true, historical_speeds_kmh: null },
+        { id: 'r2', code: 'X', name: 'Vieja', short_name: null, length_m: null, frequency_min: null, active: false, historical_speeds_kmh: null },
+      ],
+      stops: [
+        { id: 's2', route_id: 'r1', name: 'B', stop_order: 2, distance_from_start_m: 2000, location: { type: 'Point', coordinates: [-79.96, -2.14] } },
+        { id: 's1', route_id: 'r1', name: 'A', stop_order: 1, distance_from_start_m: 500, location: null },
+      ],
+    };
+    const fake = { from: (t: string) => ({ select: () => ({ order: async () => ({ data: tables[t], error: null }) }) }) };
+    const repo = new SupabaseRouteRepository(fake as never);
+    const routes = await repo.list();
+    expect(routes.map((r) => r.id)).toEqual(['r1']);
+    expect(routes[0].code).toBe(4);
+    expect(routes[0].stops.map((s) => s.name)).toEqual(['A', 'B']);
+    expect(routes[0].stops[1]).toMatchObject({ lat: -2.14, lng: -79.96 });
+    expect(routes[0].historicalSpeedsKmh).toHaveLength(3);
+  });
+});

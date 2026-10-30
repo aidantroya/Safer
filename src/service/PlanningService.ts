@@ -1,7 +1,12 @@
 import { weekdayOf, type Bus, type Route, type RouteAssignment, type User } from '@/domain/model';
 import type { IAssignmentRepository, IBusRepository, IRouteRepository, IUserRepository } from '@/domain/repository';
 import { DomainError } from './errors';
-import type { DriverRating, RouteCatalogService } from './RouteCatalogService';
+import type { DriverRating } from './RouteCatalogService';
+
+/** De dónde sale la calificación de cada conductor (reseñas). */
+export interface DriverRatingSource {
+  driverRating(driverId: string): Promise<DriverRating>;
+}
 
 export const WEEKDAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
@@ -26,7 +31,7 @@ export class PlanningService {
     private routes: IRouteRepository,
     private users: IUserRepository,
     private buses: IBusRepository,
-    private catalog: RouteCatalogService,
+    private ratings: DriverRatingSource,
     private now: () => number = () => Date.now(),
   ) {}
 
@@ -36,7 +41,7 @@ export class PlanningService {
       today: weekdayOf(this.now()),
       routes: await this.routes.list(),
       drivers: await Promise.all(
-        drivers.map(async (d) => ({ id: d.id, name: d.name, fullName: d.fullName, rating: await this.catalog.driverRating(d.id) })),
+        drivers.map(async (d) => ({ id: d.id, name: d.name, fullName: d.fullName, rating: await this.ratings.driverRating(d.id) })),
       ),
       buses: await this.buses.list(),
       assignments: await this.assignments.listAll(),
@@ -53,7 +58,7 @@ export class PlanningService {
   async saveWeek(days: PlanItem[][]): Promise<void> {
     if (days.length !== 7) throw new DomainError('BAD_WEEK', 'El plan semanal debe traer los 7 días.');
     for (let d = 0; d < 7; d++) await this.validateDay(d, days[d]);
-    for (let d = 0; d < 7; d++) await this.assignments.replaceDay(d, days[d].map((i) => ({ ...i, weekday: d })));
+    await this.assignments.replaceDays(days.map((items, d) => ({ weekday: d, items: items.map((i) => ({ ...i, weekday: d })) })));
   }
 
   private async validateDay(weekday: number, items: PlanItem[]): Promise<void> {

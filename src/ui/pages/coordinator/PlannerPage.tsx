@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { app } from '@/api';
+import { coordinatorApi } from '@/api/coordinatorApi';
 import type { ReviewInsight, Route } from '@/domain/model';
 import { WEEKDAY_NAMES, type PlanItem, type WeekPlan } from '@/service/PlanningService';
 import { Icon } from '../../components/Icon';
@@ -9,6 +9,7 @@ import { useToasts } from '../../components/Toasts';
 import { haptic } from '../../lib/haptics';
 import { useSession } from '../../session/SessionContext';
 import { ThemeToggle } from '../../theme/ThemeContext';
+import { DriversSection } from './DriversSection';
 
 const SHORT_DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
@@ -58,31 +59,34 @@ const sameDay = (a: Record<string, Cell>, b: Record<string, Cell>) =>
 
 /** Pantalla "Planificador semanal" de Coordinación: conductor + bus para cada ruta y cada día. */
 export function PlannerPage() {
-  const { user, ready, logout } = useSession();
+  const { user, ready, logout, backend, isCoordinator } = useSession();
+  const api = useMemo(() => coordinatorApi(backend === 'supabase'), [backend]);
+  const [loadError, setLoadError] = useState<string>();
   const { toast } = useToasts();
   const navigate = useNavigate();
   const [plan, setPlan] = useState<WeekPlan>();
   const [saved, setSaved] = useState<Draft>();
   const [draft, setDraft] = useState<Draft>();
-  const [mode, setMode] = useState<'dia' | 'semana'>('dia');
+  const [mode, setMode] = useState<'dia' | 'semana' | 'conductores'>('dia');
   const [day, setDay] = useState<number>();
   const [busy, setBusy] = useState(false);
   const [insights, setInsights] = useState<Record<string, ReviewInsight>>({});
 
   const load = useCallback(async () => {
-    const res = await app.coordinator.getWeekPlan();
-    if (!res.ok) return toast('No se pudo cargar el plan', res.error, 'warn');
+    const res = await api.coordinator.getWeekPlan();
+    if (!res.ok) return setLoadError(res.error);
+    setLoadError(undefined);
     const d = toDraft(res.data);
     setPlan(res.data);
     setSaved(d);
     setDraft(d);
     setDay((cur) => cur ?? res.data.today);
     for (const d of res.data.drivers) {
-      void app.coordinator.getDriverInsight(d.id).then((r) => {
+      void api.coordinator.getDriverInsight(d.id).then((r) => {
         if (r.ok && r.data) setInsights((cur) => ({ ...cur, [d.id]: r.data! }));
       });
     }
-  }, [toast]);
+  }, [api]);
 
   useEffect(() => {
     if (user?.role === 'coordinator') void load();
@@ -92,6 +96,19 @@ export function PlannerPage() {
 
   if (ready && (!user || user.role !== 'coordinator')) return <Navigate to="/coordinador" replace />;
   if (!user) return null;
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-surface-bg flex items-center justify-center p-5">
+        <div role="alert" className="max-w-sm w-full bg-surface-card rounded-3xl p-6 shadow-level-2 border border-outline-variant/30 flex flex-col gap-3">
+          <Icon name="cloud_off" className="text-[36px] text-alert-coral" />
+          <h1 className="text-headline-sm font-bold text-on-surface">No se pudo cargar la planificación</h1>
+          <p className="text-body-sm text-on-surface-variant">{loadError}</p>
+          <button type="button" onClick={() => void load()} className="h-12 rounded-full bg-primary text-on-primary text-label-lg font-bold">Reintentar</button>
+          <button type="button" onClick={() => { logout(); navigate('/coordinador'); }} className="h-11 rounded-full text-on-surface-variant text-label-md font-semibold">Cerrar sesión</button>
+        </div>
+      </div>
+    );
+  }
   if (!plan || !draft || !saved || day === undefined) {
     return <p className="p-6 text-on-surface-variant">Cargando planificador…</p>;
   }
@@ -106,7 +123,7 @@ export function PlannerPage() {
   const saveDay = async () => {
     if (problems[day].length) return toast('Revisa el plan', problems[day][0], 'warn');
     setBusy(true);
-    const res = await app.coordinator.saveDay(day, toItems(draft[day]));
+    const res = await api.coordinator.saveDay(day, toItems(draft[day]));
     setBusy(false);
     if (!res.ok) return toast('No se pudo guardar', res.error, 'warn');
     haptic.success();
@@ -121,7 +138,7 @@ export function PlannerPage() {
       return toast(`Revisa el ${WEEKDAY_NAMES[bad].toLowerCase()}`, problems[bad][0], 'warn');
     }
     setBusy(true);
-    const res = await app.coordinator.saveWeek(draft.map(toItems));
+    const res = await api.coordinator.saveWeek(draft.map(toItems));
     setBusy(false);
     if (!res.ok) return toast('No se pudo guardar', res.error, 'warn');
     haptic.success();
@@ -178,15 +195,37 @@ export function PlannerPage() {
           </div>
         </div>
 
-        <div role="tablist" aria-label="Modo de planificación" className="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
-          {([['dia', 'Por día', 'today'], ['semana', 'Semana completa', 'date_range']] as const).map(([m, label, icon]) => (
+        {api.source === 'supabase' ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-label-sm text-on-surface-variant flex items-center gap-1.5">
+              <Icon name="cloud_done" className="text-[16px] text-secondary" /> Datos reales de Supabase • {plan.routes.length} rutas • {plan.buses.length} buses
+            </p>
+            {!isCoordinator && (
+              <p role="status" className="text-label-sm rounded-xl p-2.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                Tu cuenta no tiene el rol de Coordinación en la base: puedes ver el plan, pero no guardarlo.
+              </p>
+            )}
+            {plan.drivers.length === 0 && (
+              <button type="button" onClick={() => setMode('conductores')} className="text-left text-label-sm rounded-xl p-2.5 bg-primary/10 text-primary border border-primary/30 font-semibold">
+                Aún no hay conductores en la base. Regístralos en la pestaña Conductores →
+              </button>
+            )}
+          </div>
+        ) : (
+          <p className="text-label-sm text-on-surface-variant flex items-center gap-1.5">
+            <Icon name="science" className="text-[16px]" /> Modo demo: datos de ejemplo en memoria
+          </p>
+        )}
+
+        <div role="tablist" aria-label="Modo de planificación" className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+          {([['dia', 'Por día', 'today'], ['semana', 'Semana', 'date_range'], ['conductores', 'Conductores', 'badge']] as const).map(([m, label, icon]) => (
             <button
               key={m}
               type="button"
               role="tab"
               aria-selected={mode === m}
               onClick={() => setMode(m)}
-              className={`min-h-[44px] rounded-xl text-label-lg flex items-center justify-center gap-1.5 transition-all ${
+              className={`min-h-[44px] rounded-xl text-label-md flex items-center justify-center gap-1 transition-all ${
                 mode === m ? 'bg-surface-card text-primary font-bold shadow-level-1' : 'text-on-surface-variant font-medium'
               }`}
             >
@@ -194,6 +233,8 @@ export function PlannerPage() {
             </button>
           ))}
         </div>
+
+        {mode === 'conductores' && <DriversSection drivers={api.drivers} buses={plan.buses} onChanged={() => void load()} />}
 
         {mode === 'dia' && Object.keys(insights).length > 0 && (
           <details className="bg-surface-card rounded-2xl shadow-level-1 border border-outline-variant/30 group">
@@ -210,7 +251,7 @@ export function PlannerPage() {
           </details>
         )}
 
-        {mode === 'dia' ? (
+        {mode === 'conductores' ? null : mode === 'dia' ? (
           <>
             <div className="grid grid-cols-7 gap-1.5" role="tablist" aria-label="Día de la semana">
               {SHORT_DAYS.map((d, i) => (
