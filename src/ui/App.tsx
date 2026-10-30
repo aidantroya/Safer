@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ToastProvider } from './components/Toasts';
 import { LandingPage } from './pages/LandingPage';
+import { CoordinatorLoginPage } from './pages/coordinator/CoordinatorLoginPage';
+import { PlannerPage } from './pages/coordinator/PlannerPage';
 import { DriverLoginPage } from './pages/driver/DriverLoginPage';
 import { DriverPanelPage } from './pages/driver/DriverPanelPage';
 import { DriverProfilePage } from './pages/driver/DriverProfilePage';
@@ -31,6 +33,9 @@ export function App() {
         <Route path="/conductor/panel" element={<DriverPanelPage />} />
         <Route path="/conductor/incidencia" element={<DriverPanelPage reporting />} />
         <Route path="/conductor/perfil" element={<DriverProfilePage />} />
+
+        <Route path="/coordinador" element={<CoordinatorLoginPage />} />
+        <Route path="/coordinador/planificador" element={<PlannerPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -10,6 +10,9 @@ export class AuthController {
   loginDriver(email: string, password: string): Promise<ApiResult<User>> {
     return run(() => this.auth.login(email, password, 'driver'));
   }
+  loginCoordinator(email: string, password: string): Promise<ApiResult<User>> {
+    return run(() => this.auth.login(email, password, 'coordinator'));
+  }
   getUser(id: string): Promise<User | undefined> {
     return this.auth.getUser(id);
   }

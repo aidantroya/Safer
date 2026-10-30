@@ -7,6 +7,7 @@ interface SessionValue {
   ready: boolean;
   loginPassenger: (email: string, password: string) => Promise<string | undefined>;
   loginDriver: (email: string, password: string) => Promise<{ user?: User; error?: string }>;
+  loginCoordinator: (email: string, password: string) => Promise<string | undefined>;
   logout: () => void;
 }
 
@@ -44,6 +45,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         const error = finish(res);
         return error ? { error } : { user: res.ok ? res.data : undefined };
       },
+      loginCoordinator: async (e, p) => finish(await app.auth.loginCoordinator(e, p)),
       logout: () => {
         sessionStorage.removeItem(KEY);
         sessionStorage.removeItem(TRIP_KEY);

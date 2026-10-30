@@ -6,6 +6,7 @@ import type {
 
 export interface IUserRepository {
   findById(id: string): Promise<User | undefined>;
+  listByRole(role: User['role']): Promise<User[]>;
   findByCredentials(email: string, secret: string): Promise<User | undefined>;
   save(user: User): Promise<void>;
 }
@@ -63,4 +64,7 @@ export interface IAssignmentRepository {
   listForDay(weekday: number): Promise<RouteAssignment[]>;
   findForRoute(routeId: string, weekday: number): Promise<RouteAssignment | undefined>;
   findForDriver(driverId: string, weekday: number): Promise<RouteAssignment | undefined>;
+  listAll(): Promise<RouteAssignment[]>;
+  /** Reemplaza toda la programación de ese día. */
+  replaceDay(weekday: number, items: RouteAssignment[]): Promise<void>;
 }

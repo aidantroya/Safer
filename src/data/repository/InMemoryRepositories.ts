@@ -18,6 +18,9 @@ export class InMemoryUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | undefined> {
     return this.db.users.find((u) => u.id === id);
   }
+  async listByRole(role: User['role']): Promise<User[]> {
+    return this.db.users.filter((u) => u.role === role);
+  }
   async findByCredentials(email: string, secret: string): Promise<User | undefined> {
     const c = this.db.credentials.find((x) => x.email.toLowerCase() === email.trim().toLowerCase() && x.secret === secret);
     return c ? this.db.users.find((u) => u.id === c.userId) : undefined;
@@ -158,5 +161,11 @@ export class InMemoryAssignmentRepository implements IAssignmentRepository {
   }
   async findForDriver(driverId: string, weekday: number): Promise<RouteAssignment | undefined> {
     return this.db.assignments.find((a) => a.driverId === driverId && a.weekday === weekday);
+  }
+  async listAll(): Promise<RouteAssignment[]> {
+    return [...this.db.assignments];
+  }
+  async replaceDay(weekday: number, items: RouteAssignment[]): Promise<void> {
+    this.db.assignments = [...this.db.assignments.filter((a) => a.weekday !== weekday), ...items.map((a) => ({ ...a, weekday }))];
   }
 }

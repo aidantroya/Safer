@@ -24,9 +24,11 @@ Fuentes e íconos van empaquetados: funciona sin internet.
 | Conductor (Carlos, Ruta 4 hoy) | `carlos.mendoza@bustrack.edu` | `conductor123` |
 | Conductora (Ana) | `ana.torres@bustrack.edu` | `conductor123` |
 | Conductor (Luis) | `luis.paredes@bustrack.edu` | `conductor123` |
+| Conductor (Jorge, de reserva) | `jorge.salazar@bustrack.edu` | `conductor123` |
+| Coordinación | `coordinacion@bustrack.edu` | `coord123` |
 | Admin (solo API, sin UI) | `admin@bustrack.edu` | `admin` |
 
-La pantalla de inicio (`/`) entra directo con cualquiera de los dos roles. Los conductores rotan de ruta cada día (programación en `seed.ts`); al entrar, la ruta y el bus se cargan solos.
+La pantalla de inicio (`/`) entra directo con cualquiera de los dos roles. La programación (qué conductor y qué bus cubren cada ruta cada día) la edita Coordinación en `/coordinador/planificador`, por día o para toda la semana; al entrar, el conductor recibe la ruta y el bus que le tocan hoy.
 
 ## Arquitectura (clean architecture)
 
@@ -77,7 +79,8 @@ Panel de demo (botón flotante oscuro): velocidad de simulación, acercar el bus
 3. Panel de demo → **Acercar el bus a mi bajada (probar alarma)**: salta la alarma de despertar; al llegar se cierra el abordaje y aparece la reseña.
 4. Pasajero: `/pasajero/rutas` → **Registrar ruta** en otra ruta → el mapa en vivo pasa a mostrar esa ruta y su bus. Cada ruta muestra el conductor de hoy y su calificación.
 5. Conductor: `/conductor` → correo + contraseña → panel con ± de aforo manual y finalizar (mantener 2 s). En **Perfil** (menú inferior) ve las reseñas de su bus.
-6. Pasajero y conductor **no se ven entre sí en pestañas distintas** (estado en memoria por pestaña; ver límites). Para probar la interacción usa el botón "Simular escaneo".
+6. Coordinación: `/coordinador` → planificador → cambia conductor/bus de una ruta y guarda. El conductor recibe esa ruta al entrar y el pasajero lo ve en **Rutas**. No deja repetir conductor ni bus el mismo día, ni usar buses fuera de línea.
+7. Pasajero y conductor **no se ven entre sí en pestañas distintas** (estado en memoria por pestaña; ver límites). Para probar la interacción usa el botón "Simular escaneo".
 
 ## Migrar a Supabase
 

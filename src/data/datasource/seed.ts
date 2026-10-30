@@ -68,6 +68,7 @@ export function createSeed(now: number) {
     { id: 'bus-18', number: 18, plate: 'GYE-4521', capacity: 40, online: true, unitCode: 'BT-UNIT-27be90d4' },
     { id: 'bus-7', number: 7, plate: 'PBD-0987', capacity: 32, online: false, unitCode: 'BT-UNIT-c41d77aa' },
     { id: 'bus-21', number: 21, plate: 'GSE-7310', capacity: 36, online: true, unitCode: 'BT-UNIT-5a0e3b19' },
+    { id: 'bus-25', number: 25, plate: 'GYE-1188', capacity: 40, online: true, unitCode: 'BT-UNIT-8d2f64c0' },
   ];
 
   const users: User[] = [
@@ -96,6 +97,8 @@ export function createSeed(now: number) {
     { id: 'user-carlos', name: 'Carlos', fullName: 'Carlos Mendoza', email: 'carlos.mendoza@bustrack.edu', role: 'driver' },
     { id: 'user-ana', name: 'Ana', fullName: 'Ana Torres', email: 'ana.torres@bustrack.edu', role: 'driver' },
     { id: 'user-luis', name: 'Luis', fullName: 'Luis Paredes', email: 'luis.paredes@bustrack.edu', role: 'driver' },
+    { id: 'user-jorge', name: 'Jorge', fullName: 'Jorge Salazar', email: 'jorge.salazar@bustrack.edu', role: 'driver' },
+    { id: 'user-coord', name: 'Coordinación', fullName: 'Coordinación de Transporte', email: 'coordinacion@bustrack.edu', role: 'coordinator' },
     { id: 'user-admin', name: 'Admin', fullName: 'Central Operativa', email: 'admin@bustrack.edu', role: 'admin' },
   ];
 
@@ -104,6 +107,8 @@ export function createSeed(now: number) {
     { email: 'carlos.mendoza@bustrack.edu', secret: 'conductor123', userId: 'user-carlos' },
     { email: 'ana.torres@bustrack.edu', secret: 'conductor123', userId: 'user-ana' },
     { email: 'luis.paredes@bustrack.edu', secret: 'conductor123', userId: 'user-luis' },
+    { email: 'jorge.salazar@bustrack.edu', secret: 'conductor123', userId: 'user-jorge' },
+    { email: 'coordinacion@bustrack.edu', secret: 'coord123', userId: 'user-coord' },
     { email: 'admin@bustrack.edu', secret: 'admin', userId: 'user-admin' },
   ];
 
@@ -132,7 +137,8 @@ export function createSeed(now: number) {
     },
   ];
 
-  // Programación semanal: los conductores rotan de ruta cada día; hoy coincide con los viajes en curso.
+  // Programación semanal inicial (la edita Coordinación): los conductores rotan de ruta cada día;
+  // hoy coincide con los viajes en curso. Jorge y el Bus #25 quedan de reserva.
   const today = weekdayOf(now);
   const crew = [
     { routeId: route.id, busId: 'bus-12' },

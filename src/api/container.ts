@@ -9,11 +9,13 @@ import { BoardingService } from '@/service/BoardingService';
 import { DriverService } from '@/service/DriverService';
 import { IncidentService } from '@/service/IncidentService';
 import { PassengerService } from '@/service/PassengerService';
+import { PlanningService } from '@/service/PlanningService';
 import { ReviewService } from '@/service/ReviewService';
 import { RouteCatalogService } from '@/service/RouteCatalogService';
 import { TripSimulationService } from '@/service/TripSimulationService';
 import { AdminController } from './AdminController';
 import { AuthController } from './AuthController';
+import { CoordinatorController } from './CoordinatorController';
 import { DriverController } from './DriverController';
 import { PassengerController } from './PassengerController';
 
@@ -43,13 +45,15 @@ export function createApp(now: () => number = () => Date.now()) {
   const driverService = new DriverService(trips, routes, buses, boardings, boardingService, now);
   const simulation = new TripSimulationService(trips, routes);
   const routeCatalog = new RouteCatalogService(routes, assignments, users, buses, trips, reviewsRepo, boardingService, now);
+  const planning = new PlanningService(assignments, routes, users, buses, routeCatalog, now);
 
   return {
     db,
     simulation,
-    services: { boardingService, passengerService, driverService, incidentService, reviewService, alarmService, routeCatalog },
+    services: { boardingService, passengerService, driverService, incidentService, reviewService, alarmService, routeCatalog, planning },
     auth: new AuthController(authService),
     passenger: new PassengerController(passengerService, boardingService, alarmService, incidentService, reviewService, routeCatalog),
+    coordinator: new CoordinatorController(planning),
     driver: new DriverController(driverService, boardingService, incidentService, routeCatalog),
     admin: new AdminController(incidentService, trips, reviewsRepo, boardingService, simulation, passengerService, db),
   };

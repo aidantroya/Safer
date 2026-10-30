@@ -219,3 +219,77 @@ describe('Rutas y perfil del conductor', () => {
     expect(p.data.distribution).toEqual([0, 1, 0, 2, 3]);
   });
 });
+
+describe('Planificador de Coordinación', () => {
+  // T0 es miércoles → weekday 2
+  const WED = 2;
+
+  it('el coordinador entra con su correo y contraseña', async () => {
+    const app = createApp(() => T0);
+    expect((await app.auth.loginCoordinator('coordinacion@bustrack.edu', 'coord123')).ok).toBe(true);
+    expect((await app.auth.loginCoordinator('carlos.mendoza@bustrack.edu', 'conductor123')).ok).toBe(false);
+  });
+
+  it('el plan trae conductores, buses y la programación de los 7 días', async () => {
+    const app = createApp(() => T0);
+    const res = await app.coordinator.getWeekPlan();
+    if (!res.ok) throw new Error(res.error);
+    expect(res.data.today).toBe(WED);
+    expect(res.data.drivers.map((d) => d.id)).toEqual(['user-carlos', 'user-ana', 'user-luis', 'user-jorge']);
+    expect(res.data.assignments).toHaveLength(21);
+  });
+
+  it('reasignar el día cambia la ruta y el bus que recibe el conductor y lo que ve el pasajero', async () => {
+    const app = createApp(() => T0);
+    const ok = await app.coordinator.saveDay(WED, [
+      { routeId: 'route-4', driverId: 'user-jorge', busId: 'bus-25' },
+      { routeId: 'route-2', driverId: 'user-carlos', busId: 'bus-21' },
+    ]);
+    expect(ok.ok).toBe(true);
+
+    const carlos = await app.driver.getTodayAssignment('user-carlos');
+    expect(carlos.ok && carlos.data?.route.id).toBe('route-2');
+    expect(carlos.ok && carlos.data?.bus.number).toBe(21);
+    const luis = await app.driver.getTodayAssignment('user-luis');
+    expect(luis.ok && luis.data).toBeUndefined();
+
+    const routes = await app.passenger.listRoutes();
+    if (!routes.ok) throw new Error(routes.error);
+    expect(routes.data.find((r) => r.route.id === 'route-4')?.driver?.id).toBe('user-jorge');
+    expect(routes.data.find((r) => r.route.id === 'route-7')?.driver).toBeUndefined();
+  });
+
+  it('no permite el mismo conductor o el mismo bus en dos rutas, ni buses fuera de línea', async () => {
+    const app = createApp(() => T0);
+    const twiceDriver = await app.coordinator.saveDay(WED, [
+      { routeId: 'route-4', driverId: 'user-ana', busId: 'bus-12' },
+      { routeId: 'route-2', driverId: 'user-ana', busId: 'bus-18' },
+    ]);
+    expect(twiceDriver.ok).toBe(false);
+    const twiceBus = await app.coordinator.saveDay(WED, [
+      { routeId: 'route-4', driverId: 'user-ana', busId: 'bus-12' },
+      { routeId: 'route-2', driverId: 'user-luis', busId: 'bus-12' },
+    ]);
+    expect(twiceBus.ok).toBe(false);
+    const offline = await app.coordinator.saveDay(WED, [{ routeId: 'route-4', driverId: 'user-ana', busId: 'bus-7' }]);
+    expect(offline.ok).toBe(false);
+    // nada de lo anterior se guardó
+    const carlos = await app.driver.getTodayAssignment('user-carlos');
+    expect(carlos.ok && carlos.data?.route.id).toBe('route-4');
+  });
+
+  it('guardar la semana es todo o nada', async () => {
+    const app = createApp(() => T0);
+    const day = [{ routeId: 'route-4', driverId: 'user-jorge', busId: 'bus-25' }];
+    const week = Array.from({ length: 7 }, () => day);
+    expect((await app.coordinator.saveWeek(week)).ok).toBe(true);
+    const plan = await app.coordinator.getWeekPlan();
+    expect(plan.ok && plan.data.assignments.every((a) => a.driverId === 'user-jorge')).toBe(true);
+    expect(plan.ok && plan.data.assignments).toHaveLength(7);
+
+    const broken = week.map((d, i) => (i === 4 ? [...d, { routeId: 'route-2', driverId: 'user-jorge', busId: 'bus-18' }] : d));
+    expect((await app.coordinator.saveWeek(broken)).ok).toBe(false);
+    const after = await app.coordinator.getWeekPlan();
+    expect(after.ok && after.data.assignments).toHaveLength(7);
+  });
+});

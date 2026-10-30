@@ -1,4 +1,4 @@
-export type UserRole = 'passenger' | 'driver' | 'admin';
+export type UserRole = 'passenger' | 'driver' | 'coordinator' | 'admin';
 
 /** Lo que el pasajero eligió seguir: ruta, dónde sube y dónde baja. */
 export interface PassengerPlan {
