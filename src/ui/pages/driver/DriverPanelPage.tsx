@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { app } from '@/api';
 import type { DriverPanel, TripSummary } from '@/service/DriverService';
+import { BottomNav, driverNavItems } from '../../components/BottomNav';
 import { DevPanel } from '../../components/DevPanel';
 import { Icon } from '../../components/Icon';
 import { RouteMap } from '../../components/RouteMap';
@@ -80,7 +81,8 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
               <div key={String(k)} className="bg-surface-container-low rounded-2xl p-3 border border-outline-variant/20"><dt className="text-label-sm text-on-surface-variant font-medium">{k}</dt><dd className="text-title-md font-bold text-primary">{v}</dd></div>
             ))}
           </dl>
-          <button type="button" onClick={() => { logout(); navigate('/'); }} className="mt-2 w-full min-h-[48px] rounded-full bg-primary text-white text-label-lg font-bold active:scale-[0.985]">Volver al inicio</button>
+          <button type="button" onClick={() => { logout(); navigate('/'); }} className="mt-2 w-full min-h-[48px] rounded-full bg-primary text-on-primary text-label-lg font-bold active:scale-[0.985]">Volver al inicio</button>
+          <button type="button" onClick={() => navigate('/conductor/perfil')} className="w-full min-h-[48px] rounded-full border border-outline-variant/50 text-primary text-label-lg font-bold active:scale-[0.985] flex items-center justify-center gap-2"><Icon name="reviews" className="text-[20px]" />Ver mis reseñas</button>
         </div>
       </div>
     );
@@ -108,9 +110,10 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col relative w-full max-w-md mx-auto overflow-hidden">
+      <main className="flex-1 flex flex-col relative w-full max-w-md mx-auto overflow-hidden pb-[68px]">
         <div className="relative">
           <RouteMap
+            routeId={route.id}
             stops={route.stops}
             busPositionM={trip.positionM}
             busLabel={`Bus #${bus.number}`}
@@ -159,7 +162,7 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
                 <div className="flex items-baseline gap-1"><span className="text-display-eta text-primary tracking-tight tabular font-extrabold">{o.occupied}</span><span className="text-headline-md text-on-surface-variant font-bold">/ {o.capacity}</span></div>
                 <p className="text-label-sm text-secondary font-semibold flex items-center gap-1 mt-0.5"><span className="w-2 h-2 rounded-full bg-secondary" />Asientos ocupados ({o.percent}%)</p>
               </div>
-              <button type="button" aria-label="Agregar pasajero manual" onClick={() => press('add')} className="w-[68px] h-[68px] rounded-full bg-primary text-white flex items-center justify-center shadow-md active:scale-90 hover:opacity-95 transition-all">
+              <button type="button" aria-label="Agregar pasajero manual" onClick={() => press('add')} className="w-[68px] h-[68px] rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-90 hover:opacity-95 transition-all">
                 <Icon name="add" className="text-[36px]" />
               </button>
             </div>
@@ -195,6 +198,7 @@ export function DriverPanelPage({ reporting = false }: { reporting?: boolean }) 
           </div>
         </div>
       </main>
+      <BottomNav items={driverNavItems} />
       <DevPanel routeId={route.id} onChanged={() => undefined} />
     </div>
   );

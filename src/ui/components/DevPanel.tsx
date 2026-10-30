@@ -25,13 +25,13 @@ export function DevPanel({ routeId, boardIndex = 3, dropIndex = 5, onChanged }: 
 
   return (
     <>
-      <button type="button" aria-label="Abrir panel de demostración" onClick={() => setOpen(true)} className="fixed right-3 top-16 z-[55] opacity-70 w-11 h-11 rounded-full bg-on-surface text-white shadow-level-3 flex items-center justify-center active:scale-95">
+      <button type="button" aria-label="Abrir panel de demostración" onClick={() => setOpen(true)} className="fixed right-3 top-16 z-[55] opacity-70 w-11 h-11 rounded-full bg-on-surface text-surface-bg shadow-level-3 flex items-center justify-center active:scale-95">
         <Icon name="tune" className="text-[22px]" />
       </button>
       {open && (
         <div className="fixed inset-0 z-[65] flex items-end justify-center">
           <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
-          <div role="dialog" aria-label="Panel de demostración" className="animate-slideup relative w-full max-w-md bg-white rounded-t-[28px] p-5 pb-8 shadow-2xl">
+          <div role="dialog" aria-label="Panel de demostración" className="animate-slideup relative w-full max-w-md bg-surface-card text-on-surface rounded-t-[28px] p-5 pb-8 shadow-2xl border-t border-outline-variant/30">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-headline-sm font-bold">Panel de demostración</h2>
               <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)} className="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center"><Icon name="close" /></button>
@@ -41,7 +41,7 @@ export function DevPanel({ routeId, boardIndex = 3, dropIndex = 5, onChanged }: 
             <p className="text-label-md font-semibold text-text-muted mb-1.5">Velocidad de la simulación</p>
             <div className="grid grid-cols-5 gap-1.5 mb-4">
               {[{ l: 'Pausa', v: 0 }, { l: '×1', v: 1 }, { l: '×5', v: 5 }, { l: '×10', v: 10 }, { l: '×30', v: 30 }].map((o) => (
-                <button key={o.v} type="button" aria-pressed={speed === o.v} onClick={() => setSim(o.v)} className={`min-h-[44px] rounded-xl text-label-lg ${speed === o.v ? 'bg-primary-container text-white' : 'bg-surface-container-low text-text-main'}`}>{o.l}</button>
+                <button key={o.v} type="button" aria-pressed={speed === o.v} onClick={() => setSim(o.v)} className={`min-h-[44px] rounded-xl text-label-lg ${speed === o.v ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-low text-text-main'}`}>{o.l}</button>
               ))}
             </div>
 

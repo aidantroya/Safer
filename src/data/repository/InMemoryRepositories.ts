@@ -1,9 +1,9 @@
 import type {
-  IAlarmPreferenceRepository, IBoardingRepository, IBusRepository, IIncidentRepository,
+  IAlarmPreferenceRepository, IAssignmentRepository, IBoardingRepository, IBusRepository, IIncidentRepository,
   IReviewRepository, IRouteRepository, ITripRepository, IUserRepository,
 } from '@/domain/repository';
 import type {
-  AlarmPreference, Boarding, Bus, Departure, Incident, IncidentStatus, Review, Route, Trip, User,
+  AlarmPreference, Boarding, Bus, Departure, Incident, IncidentStatus, Review, Route, RouteAssignment, Trip, User,
 } from '@/domain/model';
 import type { InMemoryDatabase } from '../datasource/InMemoryDatabase';
 
@@ -72,6 +72,9 @@ export class InMemoryTripRepository implements ITripRepository {
   }
   async listActive(): Promise<Trip[]> {
     return this.db.trips.filter((t) => t.status === 'en_curso');
+  }
+  async listByDriver(driverId: string): Promise<Trip[]> {
+    return this.db.trips.filter((t) => t.driverId === driverId);
   }
   async save(trip: Trip): Promise<void> {
     upsert(this.db.trips, trip);
@@ -142,5 +145,18 @@ export class InMemoryAlarmPreferenceRepository implements IAlarmPreferenceReposi
     const i = this.db.alarmPrefs.findIndex((p) => p.userId === pref.userId);
     if (i === -1) this.db.alarmPrefs.push(pref);
     else this.db.alarmPrefs[i] = pref;
+  }
+}
+
+export class InMemoryAssignmentRepository implements IAssignmentRepository {
+  constructor(private db: InMemoryDatabase) {}
+  async listForDay(weekday: number): Promise<RouteAssignment[]> {
+    return this.db.assignments.filter((a) => a.weekday === weekday);
+  }
+  async findForRoute(routeId: string, weekday: number): Promise<RouteAssignment | undefined> {
+    return this.db.assignments.find((a) => a.routeId === routeId && a.weekday === weekday);
+  }
+  async findForDriver(driverId: string, weekday: number): Promise<RouteAssignment | undefined> {
+    return this.db.assignments.find((a) => a.driverId === driverId && a.weekday === weekday);
   }
 }

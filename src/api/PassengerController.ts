@@ -4,6 +4,7 @@ import type { BoardingService, PassToken, ScanOutcome } from '@/service/Boarding
 import type { IncidentService } from '@/service/IncidentService';
 import type { PassengerService, PassengerSnapshot } from '@/service/PassengerService';
 import type { ReviewService } from '@/service/ReviewService';
+import type { RouteCatalogService, RouteOverview } from '@/service/RouteCatalogService';
 import { run, type ApiResult } from './ApiResult';
 
 /** Todo lo que la app del pasajero puede pedirle al sistema. */
@@ -14,10 +15,19 @@ export class PassengerController {
     private alarms: AlarmService,
     private incidents: IncidentService,
     private reviews: ReviewService,
+    private catalog: RouteCatalogService,
   ) {}
 
   getSnapshot(userId: string): Promise<ApiResult<PassengerSnapshot>> {
     return run(() => this.passenger.snapshot(userId));
+  }
+
+  // Rutas
+  listRoutes(): Promise<ApiResult<RouteOverview[]>> {
+    return run(() => this.catalog.listToday());
+  }
+  selectRoute(userId: string, routeId: string, stops?: Pick<PassengerPlan, 'boardStopId' | 'dropStopId'>): Promise<ApiResult<void>> {
+    return run(() => this.passenger.selectRoute(userId, routeId, stops));
   }
 
   changeStops(userId: string, change: Partial<Pick<PassengerPlan, 'boardStopId' | 'dropStopId'>>): Promise<ApiResult<void>> {

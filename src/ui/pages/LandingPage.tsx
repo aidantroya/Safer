@@ -45,7 +45,7 @@ export function LandingPage() {
           onClick={asPassenger}
           className="bg-surface-card rounded-3xl p-5 shadow-level-1 flex items-center gap-4 text-left active:scale-[0.985] transition-all border border-outline-variant/40 hover:border-primary/50 group"
         >
-          <div className="w-13 h-13 rounded-2xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+          <div className="w-13 h-13 rounded-2xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
             <Icon name="person" className="text-[26px]" />
           </div>
           <div className="flex-1 min-w-0">
@@ -72,7 +72,7 @@ export function LandingPage() {
               Entrar como conductor
             </p>
             <p className="text-body-sm text-on-surface-variant truncate">
-              Carlos • PIN rápido: 4821
+              Carlos • carlos.mendoza@bustrack.edu
             </p>
           </div>
           <Icon name="arrow_forward" className="text-on-surface-variant text-[22px] group-hover:translate-x-0.5 transition-transform" />

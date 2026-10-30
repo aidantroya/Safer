@@ -85,7 +85,7 @@ export function HomePage() {
           >
             <Icon name="notifications" className="text-[20px]" />
             {history.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-alert-coral ring-2 ring-white" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-alert-coral ring-2 ring-surface-card" />
             )}
           </button>
         </div>
@@ -93,7 +93,7 @@ export function HomePage() {
 
       {/* Selector de atajos y paradas favoritas */}
       <section className="px-margin py-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-outline-variant/20 bg-surface-card/60">
-        {(user.favorites ?? []).map((f, i) => (
+        {(user.favorites ?? []).filter((f) => !f.stopId || route.stops.some((s) => s.id === f.stopId)).map((f, i) => (
           <button
             key={f.label}
             type="button"
@@ -106,7 +106,7 @@ export function HomePage() {
             }}
             className={`px-3 py-1.5 rounded-full text-label-md flex items-center gap-1.5 shrink-0 active:scale-[0.985] transition-all ${
               (f.stopId ? f.stopId === boardStop.id : i === 0)
-                ? 'bg-primary text-white shadow-sm font-bold'
+                ? 'bg-primary text-on-primary shadow-sm font-bold'
                 : 'bg-surface-container-low text-on-surface hover:bg-surface-container border border-outline-variant/30 font-medium'
             }`}
           >
@@ -119,6 +119,7 @@ export function HomePage() {
       {/* Área enfocada únicamente en el mapa interactivo y tarjeta de ruta */}
       <main className="relative flex-1 flex flex-col">
         <RouteMap
+          routeId={route.id}
           stops={route.stops}
           busPositionM={state === 'sin_servicio' ? undefined : trip?.positionM}
           busLabel={bus ? `Bus #${bus.number}` : 'Bus'}
@@ -180,7 +181,7 @@ export function HomePage() {
                 type="button"
                 onClick={() => setShowStops((v) => !v)}
                 aria-expanded={showStops}
-                className="flex-1 min-h-[44px] px-4 py-2.5 bg-primary text-white rounded-[12px] text-label-lg font-bold flex items-center justify-center gap-2 shadow-sm active:scale-[0.985] transition-transform hover:opacity-95"
+                className="flex-1 min-h-[44px] px-4 py-2.5 bg-primary text-on-primary rounded-[12px] text-label-lg font-bold flex items-center justify-center gap-2 shadow-sm active:scale-[0.985] transition-transform hover:opacity-95"
               >
                 <Icon name="route" className="text-[18px]" />
                 <span>{showStops ? 'Ocultar recorrido' : 'Ver recorrido completo'}</span>

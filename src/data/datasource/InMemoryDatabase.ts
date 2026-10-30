@@ -1,5 +1,5 @@
 import type {
-  AlarmPreference, Boarding, Bus, Departure, Incident, Review, Route, Trip, User,
+  AlarmPreference, Boarding, Bus, Departure, Incident, Review, Route, RouteAssignment, Trip, User,
 } from '@/domain/model';
 import { createSeed } from './seed';
 
@@ -20,6 +20,7 @@ export class InMemoryDatabase {
   incidents: Incident[] = [];
   reviews: Review[] = [];
   alarmPrefs: AlarmPreference[] = [];
+  assignments: RouteAssignment[] = [];
   departures: { atMinutes: number; item: Omit<Departure, 'time'> }[] = [];
   private boardingSeq = 0;
   private folioSeq = 8842;
@@ -37,9 +38,10 @@ export class InMemoryDatabase {
     this.trips = seed.trips;
     this.boardings = seed.boardings;
     this.incidents = [];
-    this.reviews = [];
+    this.reviews = seed.reviews;
     this.alarmPrefs = seed.alarmPrefs;
     this.departures = seed.departures;
+    this.assignments = seed.assignments;
     this.boardingSeq = this.boardings.length;
     this.folioSeq = 8842;
   }

@@ -32,7 +32,7 @@ function Switch({ on, label, onChange }: { on: boolean; label: string; onChange:
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" aria-pressed={active} onClick={() => { haptic.light(); onClick(); }}
-      className={`py-2 px-3 rounded-full text-center text-label-sm transition-all duration-150 active:scale-[0.98] flex items-center justify-center gap-1.5 ${active ? 'bg-primary text-white shadow-sm font-semibold' : 'bg-surface-container-low text-on-surface hover:bg-surface-container border border-outline-variant/40 font-medium'}`}>
+      className={`py-2 px-3 rounded-full text-center text-label-sm transition-all duration-150 active:scale-[0.98] flex items-center justify-center gap-1.5 ${active ? 'bg-primary text-on-primary shadow-sm font-semibold' : 'bg-surface-container-low text-on-surface hover:bg-surface-container border border-outline-variant/40 font-medium'}`}>
       {children}
     </button>
   );
@@ -79,16 +79,16 @@ export function AlarmsPage() {
       </header>
 
       <main className="px-margin pt-3 flex flex-col gap-space-md">
-        <div className="bg-primary text-white rounded-[20px] p-space-md shadow-sm flex items-center justify-between relative overflow-hidden">
+        <div className="bg-primary text-on-primary rounded-[20px] p-space-md shadow-sm flex items-center justify-between relative overflow-hidden">
           <div className="relative z-10 pr-2">
             <div className="flex items-center gap-1.5 mb-1">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-label-sm text-white/90 uppercase tracking-wider font-bold">Modo trayecto seguro</span>
+              <span className="text-label-sm text-on-primary/90 uppercase tracking-wider font-bold">Modo trayecto seguro</span>
             </div>
-            <p className="text-body-md text-white font-medium">GPS y avisos inteligentes sincronizados en tiempo real.</p>
+            <p className="text-body-md text-on-primary font-medium">GPS y avisos inteligentes sincronizados en tiempo real.</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-white shrink-0 relative z-10"><Icon name="notifications_active" className="text-3xl" /></div>
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
+          <div className="w-12 h-12 rounded-2xl bg-on-primary/15 flex items-center justify-center text-on-primary shrink-0 relative z-10"><Icon name="notifications_active" className="text-3xl" /></div>
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-on-primary/10 rounded-full blur-xl pointer-events-none" />
         </div>
 
         <section className="bg-surface-card rounded-[22px] p-space-md shadow-level-1 border border-outline-variant/30 flex flex-col gap-space-md">
@@ -152,7 +152,7 @@ export function AlarmsPage() {
           <Link to="/pasajero/alertas/reportar" className="text-label-md font-bold text-primary hover:underline">Reportar</Link>
         </div>
 
-        <button type="button" onClick={save} disabled={saving} className="w-full h-12 rounded-full bg-primary text-white font-bold text-label-lg shadow-sm active:scale-[0.985] disabled:opacity-50">
+        <button type="button" onClick={save} disabled={saving} className="w-full h-12 rounded-full bg-primary text-on-primary font-bold text-label-lg shadow-sm active:scale-[0.985] disabled:opacity-50">
           {saving ? 'Guardando…' : 'Guardar preferencias'}
         </button>
       </main>

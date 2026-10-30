@@ -1,69 +1,51 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { app } from '@/api';
-import type { Bus, Route } from '@/domain/model';
 import { Icon } from '../../components/Icon';
 import { useToasts } from '../../components/Toasts';
 import { haptic } from '../../lib/haptics';
 import { TRIP_KEY, useSession } from '../../session/SessionContext';
 import { ThemeToggle } from '../../theme/ThemeContext';
 
-/** Pantalla "Inicio de sesión de Conductor (SAFER)". PIN de demo: 4821. */
+/** Pantalla "Inicio de sesión de Conductor (SAFER)". Correo y contraseña; la ruta y la unidad las asigna Coordinación. */
 export function DriverLoginPage() {
-  const { loginDriver } = useSession();
+  const { loginDriver, logout } = useSession();
   const { toast } = useToasts();
   const navigate = useNavigate();
   const [email, setEmail] = useState('carlos.mendoza@bustrack.edu');
-  const [pin, setPin] = useState(['4', '8', '2', '1']);
-  const [assignedBus, setAssignedBus] = useState<Bus>();
-  const [assignedRoute, setAssignedRoute] = useState<Route>();
+  const [password, setPassword] = useState('conductor123');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
-  const refs = useRef<(HTMLInputElement | null)[]>([]);
-
-  useEffect(() => {
-    // La coordinación de transporte ya tiene asignada la unidad y la ruta para este turno
-    void app.driver.getSetupOptions().then((r) => {
-      if (!r.ok) return;
-      const bus = r.data.buses.find((b) => b.online) ?? r.data.buses[0];
-      const route = r.data.routes[0];
-      setAssignedBus(bus);
-      setAssignedRoute(route);
-    });
-    refs.current[3]?.focus();
-  }, []);
-
-  const setDigit = (i: number, v: string) => {
-    const d = v.replace(/\D/g, '').slice(-1);
-    const next = [...pin];
-    next[i] = d;
-    setPin(next);
-    if (d && i < 3) refs.current[i + 1]?.focus();
-  };
 
   const submit = async () => {
-    if (!assignedBus || !assignedRoute) {
-      return toast('Cargando turno', 'Esperando confirmación de la central de despacho…', 'info');
-    }
     setBusy(true);
     haptic.medium();
 
-    const login = await loginDriver(email, pin.join(''));
+    const login = await loginDriver(email, password);
     if (!login.user) {
       setBusy(false);
       return toast('Credenciales inválidas', login.error, 'warn');
     }
 
-    // El viaje se inicia automáticamente con la ruta y unidad asignadas por el coordinador
-    const res = await app.driver.startTrip(login.user, assignedBus.id, assignedRoute.id);
+    // El viaje se inicia con la ruta y la unidad que Coordinación le asignó hoy al conductor
+    const assigned = await app.driver.getTodayAssignment(login.user.id);
+    if (!assigned.ok || !assigned.data) {
+      setBusy(false);
+      logout();
+      return toast('Sin turno asignado', 'Coordinación no te asignó una ruta para hoy.', 'warn');
+    }
+    const { route, bus } = assigned.data;
+    const res = await app.driver.startTrip(login.user, bus.id, route.id);
     setBusy(false);
 
     if (!res.ok) {
+      logout();
       return toast('No se pudo iniciar el viaje', res.error, 'warn');
     }
 
     sessionStorage.setItem(TRIP_KEY, res.data.id);
     haptic.success();
-    toast('Turno iniciado', `Ruta asignada: ${assignedRoute.name}`, 'ok');
+    toast('Turno iniciado', `${route.name} • Bus #${bus.number}`, 'ok');
     navigate('/conductor/panel');
   };
 
@@ -102,11 +84,10 @@ export function DriverLoginPage() {
           Bienvenido, Conductor
         </h1>
         <p className="text-body-sm text-on-surface-variant max-w-xs mt-1">
-          Ingresa tus credenciales para acceder a tu turno y ruta asignada por Coordinación.
+          Ingresa con tu correo institucional y tu contraseña para iniciar tu turno.
         </p>
       </header>
 
-      {/* Formulario de Login Únicamente */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -117,12 +98,12 @@ export function DriverLoginPage() {
         <fieldset className="flex flex-col gap-3 border-0 p-0 m-0">
           <legend className="text-label-lg text-on-surface font-bold mb-1 flex items-center gap-1.5">
             <Icon name="badge" className="text-[20px] text-primary" />
-            Credenciales de turno
+            Iniciar sesión
           </legend>
 
           <div>
             <label htmlFor="conductor-email" className="text-label-sm text-on-surface-variant font-medium block mb-1">
-              Usuario o correo institucional
+              Correo institucional
             </label>
             <div className="relative flex items-center">
               <Icon name="alternate_email" className="absolute left-3.5 text-on-surface-variant/60 text-[20px] pointer-events-none" />
@@ -133,65 +114,57 @@ export function DriverLoginPage() {
                 className={field}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="carlos.mendoza@bustrack.edu"
+                placeholder="nombre@bustrack.edu"
                 required
               />
             </div>
           </div>
 
-          <div className="pt-1">
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-label-sm text-on-surface-variant font-medium">PIN de turno</span>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label htmlFor="conductor-password" className="text-label-sm text-on-surface-variant font-medium">
+                Contraseña
+              </label>
               <span className="text-label-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                Demo: 4821
+                Demo: conductor123
               </span>
             </div>
-            <div className="grid grid-cols-4 gap-2.5">
-              {pin.map((d, i) => (
-                <input
-                  key={i}
-                  ref={(el) => {
-                    refs.current[i] = el;
-                  }}
-                  type="password"
-                  inputMode="numeric"
-                  maxLength={1}
-                  aria-label={`Dígito ${i + 1} del PIN`}
-                  value={d}
-                  onChange={(e) => setDigit(i, e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Backspace' && !pin[i] && i > 0) refs.current[i - 1]?.focus();
-                  }}
-                  placeholder="•"
-                  className="h-13 text-center text-headline-sm font-bold bg-surface-container-low border border-outline-variant/50 rounded-2xl text-on-surface focus:bg-surface-card focus:border-2 focus:border-primary outline-none transition-all shadow-inner"
-                />
-              ))}
+            <div className="relative flex items-center">
+              <Icon name="lock" className="absolute left-3.5 text-on-surface-variant/60 text-[20px] pointer-events-none" />
+              <input
+                id="conductor-password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                className={`${field} pr-12`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                className="absolute right-2 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container"
+              >
+                <Icon name={showPassword ? 'visibility_off' : 'visibility'} className="text-[20px]" />
+              </button>
             </div>
           </div>
         </fieldset>
 
-        {/* Tarjeta de Asignación por el Coordinador */}
         <div className="bg-surface-container-low/80 rounded-2xl p-3.5 border border-outline-variant/30 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shrink-0 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
             <Icon name="assignment_turned_in" className="text-[22px]" />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-label-sm font-bold text-primary truncate">Ruta y unidad asignadas</span>
-            </div>
-            <p className="text-body-sm text-on-surface-variant truncate font-medium mt-0.5">
-              {assignedRoute && assignedBus
-                ? `${assignedRoute.name} • Bus #${assignedBus.number}`
-                : 'Cargando asignación de coordinación…'}
-            </p>
-          </div>
+          <p className="text-body-sm text-on-surface-variant font-medium">
+            Tu ruta y tu unidad de hoy se cargan automáticamente según la programación de Coordinación.
+          </p>
         </div>
 
         <button
           type="submit"
-          disabled={busy || pin.some((d) => !d)}
-          className="w-full py-3.5 px-4 rounded-2xl bg-primary text-white hover:opacity-95 active:scale-[0.985] text-label-lg font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
+          disabled={busy || !email || !password}
+          className="w-full py-3.5 px-4 rounded-2xl bg-primary text-on-primary hover:opacity-95 active:scale-[0.985] text-label-lg font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50"
         >
           <span>{busy ? 'Iniciando turno…' : 'Iniciar turno y ver ruta'}</span>
           <Icon name="arrow_forward" className="text-[20px]" />

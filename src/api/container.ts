@@ -1,6 +1,6 @@
 import { InMemoryDatabase } from '@/data/datasource/InMemoryDatabase';
 import {
-  InMemoryAlarmPreferenceRepository, InMemoryBoardingRepository, InMemoryBusRepository, InMemoryIncidentRepository,
+  InMemoryAlarmPreferenceRepository, InMemoryAssignmentRepository, InMemoryBoardingRepository, InMemoryBusRepository, InMemoryIncidentRepository,
   InMemoryReviewRepository, InMemoryRouteRepository, InMemoryTripRepository, InMemoryUserRepository,
 } from '@/data/repository/InMemoryRepositories';
 import { AlarmService } from '@/service/AlarmService';
@@ -10,6 +10,7 @@ import { DriverService } from '@/service/DriverService';
 import { IncidentService } from '@/service/IncidentService';
 import { PassengerService } from '@/service/PassengerService';
 import { ReviewService } from '@/service/ReviewService';
+import { RouteCatalogService } from '@/service/RouteCatalogService';
 import { TripSimulationService } from '@/service/TripSimulationService';
 import { AdminController } from './AdminController';
 import { AuthController } from './AuthController';
@@ -31,6 +32,7 @@ export function createApp(now: () => number = () => Date.now()) {
   const incidentsRepo = new InMemoryIncidentRepository(db);
   const reviewsRepo = new InMemoryReviewRepository(db);
   const alarmPrefs = new InMemoryAlarmPreferenceRepository(db);
+  const assignments = new InMemoryAssignmentRepository(db);
 
   const authService = new AuthService(users);
   const boardingService = new BoardingService(boardings, trips, buses, users, now);
@@ -40,14 +42,15 @@ export function createApp(now: () => number = () => Date.now()) {
   const passengerService = new PassengerService(users, routes, trips, buses, boardings, reviewsRepo, boardingService, alarmService, now);
   const driverService = new DriverService(trips, routes, buses, boardings, boardingService, now);
   const simulation = new TripSimulationService(trips, routes);
+  const routeCatalog = new RouteCatalogService(routes, assignments, users, buses, trips, reviewsRepo, boardingService, now);
 
   return {
     db,
     simulation,
-    services: { boardingService, passengerService, driverService, incidentService, reviewService, alarmService },
+    services: { boardingService, passengerService, driverService, incidentService, reviewService, alarmService, routeCatalog },
     auth: new AuthController(authService),
-    passenger: new PassengerController(passengerService, boardingService, alarmService, incidentService, reviewService),
-    driver: new DriverController(driverService, boardingService, incidentService),
+    passenger: new PassengerController(passengerService, boardingService, alarmService, incidentService, reviewService, routeCatalog),
+    driver: new DriverController(driverService, boardingService, incidentService, routeCatalog),
     admin: new AdminController(incidentService, trips, reviewsRepo, boardingService, simulation, passengerService, db),
   };
 }

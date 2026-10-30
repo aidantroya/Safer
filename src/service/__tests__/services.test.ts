@@ -160,3 +160,62 @@ describe('Viaje completo del pasajero', () => {
     expect(ok.ok && ok.data.locationLabel).toBe('Campus Norte - Av. Principal');
   });
 });
+
+describe('Rutas y perfil del conductor', () => {
+  it('el conductor entra con correo y contraseña (ya no con PIN)', async () => {
+    const app = createApp(() => T0);
+    expect((await app.auth.loginDriver('carlos.mendoza@bustrack.edu', 'conductor123')).ok).toBe(true);
+    expect((await app.auth.loginDriver('carlos.mendoza@bustrack.edu', '4821')).ok).toBe(false);
+  });
+
+  it('cada ruta muestra el conductor asignado hoy y su calificación', async () => {
+    const app = createApp(() => T0);
+    const res = await app.passenger.listRoutes();
+    if (!res.ok) throw new Error(res.error);
+    expect(res.data.map((r) => r.route.id)).toEqual(['route-4', 'route-2', 'route-7']);
+    const r4 = res.data[0];
+    expect(r4.driver?.id).toBe('user-carlos');
+    expect(r4.bus?.number).toBe(12);
+    expect(r4.rating).toEqual({ average: 4.6, count: 5 });
+    expect(r4.live?.occupancy.occupied).toBe(23);
+  });
+
+  it('registrar otra ruta cambia lo que sigue el mapa en vivo', async () => {
+    const app = createApp(() => T0);
+    const ok = await app.passenger.selectRoute('user-diego', 'route-7', { boardStopId: 'stop-rectorado', dropStopId: 'stop-universitaria' });
+    expect(ok.ok).toBe(true);
+    const s = await app.passenger.getSnapshot('user-diego');
+    if (!s.ok) throw new Error(s.error);
+    expect(s.data.route.id).toBe('route-7');
+    expect(s.data.boardStop.id).toBe('stop-rectorado');
+    expect(s.data.bus?.number).toBe(21);
+
+    const bad = await app.passenger.selectRoute('user-diego', 'route-2', { boardStopId: 'stop-sureste', dropStopId: 'stop-oeste' });
+    expect(bad.ok).toBe(false);
+  });
+
+  it('no se puede cambiar de ruta estando a bordo', async () => {
+    const app = createApp(() => T0);
+    const pass = await app.passenger.issuePass('user-diego');
+    if (!pass.ok) throw new Error();
+    await app.driver.scanPassenger('trip-1', pass.data.token);
+    expect((await app.passenger.selectRoute('user-diego', 'route-2')).ok).toBe(false);
+  });
+
+  it('el perfil del conductor junta las reseñas de su bus, incluida una nueva', async () => {
+    const app = createApp(() => T0);
+    const pass = await app.passenger.issuePass('user-diego');
+    if (!pass.ok) throw new Error();
+    await app.driver.scanPassenger('trip-1', pass.data.token);
+    await app.driver.finishTrip('trip-1');
+    await app.passenger.submitReview({ tripId: 'trip-1', passengerId: 'user-diego', rating: 2, tags: ['brusca'], comment: 'Frenazos' });
+
+    const p = await app.driver.getProfile('user-carlos');
+    if (!p.ok) throw new Error(p.error);
+    expect(p.data.rating.count).toBe(6);
+    expect(p.data.reviews[0].review.comment).toBe('Frenazos');
+    expect(p.data.reviews[0].busNumber).toBe(12);
+    expect(p.data.today?.route.id).toBe('route-4');
+    expect(p.data.distribution).toEqual([0, 1, 0, 2, 3]);
+  });
+});

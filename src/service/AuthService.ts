@@ -5,7 +5,7 @@ import { DomainError } from './errors';
 export class AuthService {
   constructor(private users: IUserRepository) {}
 
-  /** Demo: contraseña/PIN en texto plano. En producción esto lo reemplaza Supabase Auth. */
+  /** Demo: contraseña en texto plano. En producción esto lo reemplaza Supabase Auth. */
   async login(email: string, secret: string, expectedRole: User['role']): Promise<User> {
     const user = await this.users.findByCredentials(email, secret);
     if (!user || user.role !== expectedRole) {

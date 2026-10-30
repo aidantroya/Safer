@@ -107,8 +107,8 @@ export function ReportIncidentPage({ role = 'passenger', driverTripId }: Props) 
                 const on = type === t.id;
                 return (
                   <button key={t.id} type="button" role="radio" aria-checked={on} onClick={() => { haptic.light(); setType(t.id); }}
-                    className={`flex items-center gap-2.5 p-3 rounded-2xl transition-all duration-150 active:scale-[0.985] ${on ? 'bg-primary text-white shadow-sm font-bold border border-transparent' : 'bg-surface-container-low text-on-surface border border-outline-variant/40 hover:bg-surface-container font-medium'}`}>
-                    <Icon name={t.icon} fill={on} className={`text-[22px] ${on ? 'text-white' : 'text-on-surface-variant'}`} />
+                    className={`flex items-center gap-2.5 p-3 rounded-2xl transition-all duration-150 active:scale-[0.985] ${on ? 'bg-primary text-on-primary shadow-sm font-bold border border-transparent' : 'bg-surface-container-low text-on-surface border border-outline-variant/40 hover:bg-surface-container font-medium'}`}>
+                    <Icon name={t.icon} fill={on} className={`text-[22px] ${on ? 'text-on-primary' : 'text-on-surface-variant'}`} />
                     <span className="text-label-lg">{t.label}</span>
                   </button>
                 );
@@ -151,7 +151,7 @@ export function ReportIncidentPage({ role = 'passenger', driverTripId }: Props) 
             <span className="text-body-sm text-on-surface-variant font-medium">Ubicación asignada: <span className="font-bold text-on-surface">{loc.label}</span></span>
           </div>
 
-          <button type="submit" disabled={!ready} className="w-full h-12 rounded-full bg-primary text-white font-bold text-label-lg shadow-sm active:scale-[0.985] disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+          <button type="submit" disabled={!ready} className="w-full h-12 rounded-full bg-primary text-on-primary font-bold text-label-lg shadow-sm active:scale-[0.985] disabled:opacity-50 transition-all flex items-center justify-center gap-2">
             <Icon name="send" className="text-[20px]" />
             <span>{busy ? 'Enviando…' : 'Enviar reporte a central'}</span>
           </button>
@@ -171,7 +171,7 @@ export function ReportIncidentPage({ role = 'passenger', driverTripId }: Props) 
               <span className="text-label-sm text-on-surface-variant block">Número de folio</span>
               <span className="text-headline-sm font-bold text-primary font-mono tracking-wider">{folio}</span>
             </div>
-            <button type="button" onClick={() => navigate(back)} className="w-full h-12 rounded-full bg-primary text-white font-bold text-label-lg shadow-sm active:scale-[0.985]">
+            <button type="button" onClick={() => navigate(back)} className="w-full h-12 rounded-full bg-primary text-on-primary font-bold text-label-lg shadow-sm active:scale-[0.985]">
               Entendido
             </button>
           </div>

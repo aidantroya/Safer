@@ -161,6 +161,23 @@ export class PassengerService {
     await this.users.save({ ...user, plan: next });
   }
 
+  /** El estudiante registra la ruta que usa: desde ahí el mapa en vivo y los avisos siguen esa ruta. */
+  async selectRoute(userId: string, routeId: string, stops?: Pick<PassengerPlan, 'boardStopId' | 'dropStopId'>): Promise<void> {
+    const user = await this.requirePassenger(userId);
+    const route = await this.routes.findById(routeId);
+    if (!route) throw new DomainError('ROUTE_NOT_FOUND', 'La ruta no existe.');
+    if (await this.boardingRepo.findOpenByPassenger(userId)) {
+      throw new DomainError('ON_BOARD', 'Estás a bordo de un bus. Cambia de ruta cuando bajes.');
+    }
+    const boardStopId = stops?.boardStopId ?? route.stops[0].id;
+    const dropStopId = stops?.dropStopId ?? route.stops[route.stops.length - 1].id;
+    const b = route.stops.findIndex((s) => s.id === boardStopId);
+    const d = route.stops.findIndex((s) => s.id === dropStopId);
+    if (b < 0 || d < 0) throw new DomainError('BAD_STOP', 'Parada no válida.');
+    if (d <= b) throw new DomainError('BAD_STOP', 'Tu bajada debe estar después de tu subida.');
+    await this.users.save({ ...user, plan: { ...user.plan!, routeId, boardStopId, dropStopId } });
+  }
+
   dismissReview(tripId: string, userId: string): void {
     this.dismissedReviews.add(`${tripId}:${userId}`);
   }

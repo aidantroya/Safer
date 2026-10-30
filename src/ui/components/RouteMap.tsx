@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Stop } from '@/domain/model';
-import { FULL_ROUTE_PATH, MAP_H, MAP_W, pathBetween, pointAt } from '../lib/routeGeometry';
+import { MAP_H, MAP_W, routeGeometry } from '../lib/routeGeometry';
 import { useTheme } from '../theme/ThemeContext';
 import { Icon } from './Icon';
 
 interface Props {
+  /** Define el trazado que se dibuja (ver lib/routeGeometry.ts). */
+  routeId: string;
   stops: Stop[];
   busPositionM: number | undefined;
   busLabel: string;
@@ -24,6 +26,7 @@ interface Props {
 const pct = (v: number, total: number) => `${(v / total) * 100}%`;
 
 export function RouteMap({
+  routeId,
   stops,
   busPositionM,
   busLabel,
@@ -48,6 +51,7 @@ export function RouteMap({
   const dragStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const touchDistRef = useRef<number | null>(null);
 
+  const { pointAt, pathBetween, isHorizontalAt, fullPath } = routeGeometry(routeId);
   const bus = busPositionM === undefined ? undefined : pointAt(busPositionM);
   const focusIdx = onboard ? dropIndex : boardIndex;
   const focus = stops[focusIdx] ? pointAt(stops[focusIdx].distanceFromStartM) : undefined;
@@ -246,8 +250,8 @@ export function RouteMap({
           </text>
 
           {/* ruta */}
-          <path d={FULL_ROUTE_PATH} fill="none" stroke={routeBase} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" opacity={isDark ? 0.4 : 0.55} />
-          <path d={FULL_ROUTE_PATH} fill="none" stroke={routeMain} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={fullPath} fill="none" stroke={routeBase} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" opacity={isDark ? 0.4 : 0.55} />
+          <path d={fullPath} fill="none" stroke={routeMain} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
           {busPositionM !== undefined && (
             <path d={pathBetween(0, busPositionM)} fill="none" stroke="#fff" strokeWidth="2" strokeDasharray="4,5" strokeLinecap="round" />
           )}
@@ -259,6 +263,7 @@ export function RouteMap({
             const isBoard = i === boardIndex && !onboard;
             const isDrop = i === dropIndex && onboard;
             const left = x < 200;
+            const above = isHorizontalAt(s.distanceFromStartM);
             const pinColor = isDark ? '#38BDF8' : '#112240';
             return (
               <g key={s.id}>
@@ -273,9 +278,9 @@ export function RouteMap({
                 {(isBoard || isDrop) && <circle cx={x} cy={y} r="3.5" fill={pinColor} />}
                 {!isBoard && !isDrop && (
                   <text
-                    x={left ? x - 10 : x + 10}
-                    y={y + 3}
-                    textAnchor={left ? 'end' : 'start'}
+                    x={above ? x : left ? x - 10 : x + 10}
+                    y={above ? y - 11 : y + 3}
+                    textAnchor={above ? 'middle' : left ? 'end' : 'start'}
                     fill={passed ? '#64748b' : textStop}
                     fontFamily="Inter"
                     fontSize="8.5"
@@ -301,8 +306,8 @@ export function RouteMap({
             <div className="relative flex items-center justify-center">
               <span className="absolute w-14 h-14 rounded-full bg-secondary-container/40 animate-ping-slow" />
               <span className="absolute w-9 h-9 rounded-full bg-secondary-container/30" />
-              <div className="vehicle-glow relative flex items-center gap-1.5 bg-primary text-white px-2.5 py-1 rounded-full shadow-lg border border-white/90">
-                <Icon name="directions_bus" className="text-[16px] text-white" />
+              <div className="vehicle-glow relative flex items-center gap-1.5 bg-primary text-on-primary px-2.5 py-1 rounded-full shadow-lg border border-surface-card/90">
+                <Icon name="directions_bus" className="text-[16px]" />
                 <span className="text-label-sm font-bold tracking-tight whitespace-nowrap">{busLabel}</span>
                 <Icon name="arrow_forward" className="text-[14px]" />
               </div>
@@ -314,7 +319,7 @@ export function RouteMap({
         {focus && (
           <div
             className="absolute -translate-x-1/2 -translate-y-full pointer-events-none z-20"
-            style={{ left: pct(focus[0], MAP_W), top: `calc(${pct(focus[1], MAP_H)} - 10px)` }}
+            style={{ left: pct(Math.min(Math.max(focus[0], 70), MAP_W - 70), MAP_W), top: `calc(${pct(focus[1], MAP_H)} - 10px)` }}
           >
             <div className="flex flex-col items-center">
               <div className="bg-surface-card text-on-surface px-2.5 py-1 rounded-[12px] shadow-level-1 border border-outline-variant/40 flex items-center gap-1.5">

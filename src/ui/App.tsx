@@ -3,12 +3,14 @@ import { ToastProvider } from './components/Toasts';
 import { LandingPage } from './pages/LandingPage';
 import { DriverLoginPage } from './pages/driver/DriverLoginPage';
 import { DriverPanelPage } from './pages/driver/DriverPanelPage';
+import { DriverProfilePage } from './pages/driver/DriverProfilePage';
 import { AlarmsPage } from './pages/passenger/AlarmsPage';
 import { BoardingPassPage } from './pages/passenger/BoardingPassPage';
 import { HomePage } from './pages/passenger/HomePage';
 import { PassengerLayout } from './pages/passenger/PassengerLayout';
 import { ProfilePage } from './pages/passenger/ProfilePage';
 import { ReportIncidentPage } from './pages/passenger/ReportIncidentPage';
+import { RoutesPage } from './pages/passenger/RoutesPage';
 
 export function App() {
   return (
@@ -18,6 +20,7 @@ export function App() {
 
         <Route path="/pasajero" element={<PassengerLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="rutas" element={<RoutesPage />} />
           <Route path="pase" element={<BoardingPassPage />} />
           <Route path="alertas" element={<AlarmsPage />} />
           <Route path="alertas/reportar" element={<ReportIncidentPage />} />
@@ -27,6 +30,7 @@ export function App() {
         <Route path="/conductor" element={<DriverLoginPage />} />
         <Route path="/conductor/panel" element={<DriverPanelPage />} />
         <Route path="/conductor/incidencia" element={<DriverPanelPage reporting />} />
+        <Route path="/conductor/perfil" element={<DriverProfilePage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

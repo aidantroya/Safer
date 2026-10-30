@@ -43,7 +43,7 @@ export function ReviewSheet({ review, userId, onDone }: Props) {
     <div className="fixed inset-0 z-[60] flex items-end justify-center">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={skip} />
       <div role="dialog" aria-modal="true" aria-label="Califica tu viaje" className="animate-slideup relative w-full max-w-xl bg-surface-card rounded-t-[32px] shadow-2xl max-h-[92vh] overflow-y-auto border border-outline-variant/30">
-        <div className="w-full flex justify-center pt-3 pb-1"><div className="w-12 h-1.5 bg-slate-300 rounded-full" /></div>
+        <div className="w-full flex justify-center pt-3 pb-1"><div className="w-12 h-1.5 bg-outline-variant rounded-full" /></div>
         <div className="p-6 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-4 shadow-sm ring-4 ring-secondary-container/40">
             <Icon name="check_circle" fill className="text-3xl" />
@@ -69,7 +69,7 @@ export function ReviewSheet({ review, userId, onDone }: Props) {
                   aria-checked={rating === n}
                   aria-label={`${n} ${n === 1 ? 'estrella' : 'estrellas'}`}
                   onClick={() => { setRating(n); setTags([]); setPop(n); haptic.light(); }}
-                  className={`w-11 h-11 flex items-center justify-center rounded-xl hover:bg-amber-50 active:scale-95 transition-all ${n <= rating ? 'text-amber-500' : 'text-slate-300'} ${pop === n ? 'star-pop' : ''}`}
+                  className={`w-11 h-11 flex items-center justify-center rounded-xl hover:bg-amber-500/10 active:scale-95 transition-all ${n <= rating ? 'text-amber-500' : 'text-outline-variant'} ${pop === n ? 'star-pop' : ''}`}
                   onAnimationEnd={() => setPop(0)}
                 >
                   <Icon name="star" fill={n <= rating} className="text-4xl" />
@@ -111,7 +111,7 @@ export function ReviewSheet({ review, userId, onDone }: Props) {
               <textarea
                 id="feedback-comment" rows={3} maxLength={300} value={comment} onChange={(e) => setComment(e.target.value)}
                 placeholder="Deja un comentario sobre el conductor o la unidad (opcional)..."
-                className="w-full rounded-2xl bg-surface-bg border border-outline-variant/60 p-3.5 text-body-md text-text-main placeholder:text-text-muted focus:bg-white focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all outline-none resize-none"
+                className="w-full rounded-2xl bg-surface-bg border border-outline-variant/60 p-3.5 text-body-md text-text-main placeholder:text-text-muted focus:bg-surface-card focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all outline-none resize-none"
               />
             </div>
           </div>

@@ -41,7 +41,7 @@
     --primary: 147 197 253;            /* #93C5FD Azul cielo suave */
     --primary-container: 37 99 235;    /* #2563EB Azul activo */
     --primary-fixed: 30 41 59;         /* #1E293B */
-    --on-primary: 255 255 255;
+    --on-primary: 10 17 32;            /* texto oscuro sobre azul cielo */
     --on-primary-container: 255 255 255;
 
     --surface-bg: 10 17 32;            /* #0A1120 Azul marino oscuro de fondo */
@@ -117,7 +117,7 @@
 }
 
 .ticket-cutout-left, .ticket-cutout-right {
-  position: absolute; width: 28px; height: 28px; border-radius: 9999px; background-color: var(--surface-bg); border: 1px solid var(--outline-variant);
+  position: absolute; width: 28px; height: 28px; border-radius: 9999px; background-color: rgb(var(--surface-bg)); border: 1px solid rgb(var(--outline-variant));
 }
 .ticket-cutout-left { left: -14px; }
 .ticket-cutout-right { right: -14px; }

@@ -1,5 +1,5 @@
 import type {
-  AlarmPreference, Boarding, Bus, Departure, Incident, IncidentStatus, Review, Route, Trip, User,
+  AlarmPreference, Boarding, Bus, Departure, Incident, IncidentStatus, Review, Route, RouteAssignment, Trip, User,
 } from '../model';
 
 /** Contratos. El dominio sólo conoce estas interfaces; no sabe si detrás hay memoria o Supabase. */
@@ -26,6 +26,7 @@ export interface ITripRepository {
   findById(id: string): Promise<Trip | undefined>;
   findActiveByRoute(routeId: string): Promise<Trip[]>;
   findActiveByBus(busId: string): Promise<Trip | undefined>;
+  listByDriver(driverId: string): Promise<Trip[]>;
   listActive(): Promise<Trip[]>;
   save(trip: Trip): Promise<void>;
 }
@@ -56,4 +57,10 @@ export interface IReviewRepository {
 export interface IAlarmPreferenceRepository {
   get(userId: string): Promise<AlarmPreference | undefined>;
   save(pref: AlarmPreference): Promise<void>;
+}
+
+export interface IAssignmentRepository {
+  listForDay(weekday: number): Promise<RouteAssignment[]>;
+  findForRoute(routeId: string, weekday: number): Promise<RouteAssignment | undefined>;
+  findForDriver(driverId: string, weekday: number): Promise<RouteAssignment | undefined>;
 }

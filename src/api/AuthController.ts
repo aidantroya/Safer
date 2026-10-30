@@ -7,8 +7,8 @@ export class AuthController {
   loginPassenger(email: string, password: string): Promise<ApiResult<User>> {
     return run(() => this.auth.login(email, password, 'passenger'));
   }
-  loginDriver(email: string, pin: string): Promise<ApiResult<User>> {
-    return run(() => this.auth.login(email, pin, 'driver'));
+  loginDriver(email: string, password: string): Promise<ApiResult<User>> {
+    return run(() => this.auth.login(email, password, 'driver'));
   }
   getUser(id: string): Promise<User | undefined> {
     return this.auth.getUser(id);

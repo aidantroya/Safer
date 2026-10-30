@@ -21,10 +21,12 @@ Fuentes e íconos van empaquetados: funciona sin internet.
 | Rol | Usuario | Clave |
 |---|---|---|
 | Pasajero (Diego) | `diego@espol.edu.ec` | `demo1234` |
-| Conductor (Carlos) | `carlos.mendoza@bustrack.edu` | PIN `4821` |
+| Conductor (Carlos, Ruta 4 hoy) | `carlos.mendoza@bustrack.edu` | `conductor123` |
+| Conductora (Ana) | `ana.torres@bustrack.edu` | `conductor123` |
+| Conductor (Luis) | `luis.paredes@bustrack.edu` | `conductor123` |
 | Admin (solo API, sin UI) | `admin@bustrack.edu` | `admin` |
 
-La pantalla de inicio (`/`) entra directo con cualquiera de los dos roles.
+La pantalla de inicio (`/`) entra directo con cualquiera de los dos roles. Los conductores rotan de ruta cada día (programación en `seed.ts`); al entrar, la ruta y el bus se cargan solos.
 
 ## Arquitectura (clean architecture)
 
@@ -73,8 +75,9 @@ Panel de demo (botón flotante oscuro): velocidad de simulación, acercar el bus
 1. `/` → "Entrar como pasajero". Panel de demo → **Acercar el bus a mi parada de subida** → aparece el aviso de que el bus se acerca.
 2. `/pasajero/pase` → **Simular escaneo (+1/−1)**: el conductor "escanea" tu pase y el aforo sube; el estado pasa a "A bordo".
 3. Panel de demo → **Acercar el bus a mi bajada (probar alarma)**: salta la alarma de despertar; al llegar se cierra el abordaje y aparece la reseña.
-4. Conductor: `/conductor` → PIN `4821` → panel con ± de aforo manual y finalizar (mantener 2 s).
-5. Pasajero y conductor **no se ven entre sí en pestañas distintas** (estado en memoria por pestaña; ver límites). Para probar la interacción usa el botón "Simular escaneo".
+4. Pasajero: `/pasajero/rutas` → **Registrar ruta** en otra ruta → el mapa en vivo pasa a mostrar esa ruta y su bus. Cada ruta muestra el conductor de hoy y su calificación.
+5. Conductor: `/conductor` → correo + contraseña → panel con ± de aforo manual y finalizar (mantener 2 s). En **Perfil** (menú inferior) ve las reseñas de su bus.
+6. Pasajero y conductor **no se ven entre sí en pestañas distintas** (estado en memoria por pestaña; ver límites). Para probar la interacción usa el botón "Simular escaneo".
 
 ## Migrar a Supabase
 

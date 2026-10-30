@@ -6,3 +6,4 @@ export * from './Boarding';
 export * from './Incident';
 export * from './Review';
 export * from './AlarmPreference';
+export * from './Assignment';

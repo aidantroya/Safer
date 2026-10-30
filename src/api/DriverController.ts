@@ -3,13 +3,31 @@ import type { Occupancy } from '@/service/BoardingService';
 import type { BoardingService, ScanOutcome } from '@/service/BoardingService';
 import type { DriverPanel, DriverService, TripSummary } from '@/service/DriverService';
 import type { IncidentService } from '@/service/IncidentService';
+import type { DriverProfile, RouteCatalogService } from '@/service/RouteCatalogService';
+import { DomainError } from '@/service/errors';
 import { run, type ApiResult } from './ApiResult';
 
 export class DriverController {
-  constructor(private driver: DriverService, private boarding: BoardingService, private incidents: IncidentService) {}
+  constructor(
+    private driver: DriverService,
+    private boarding: BoardingService,
+    private incidents: IncidentService,
+    private catalog: RouteCatalogService,
+  ) {}
 
   getSetupOptions(): Promise<ApiResult<{ buses: Bus[]; routes: Route[] }>> {
     return run(async () => ({ buses: await this.driver.listBuses(), routes: await this.driver.listRoutes() }));
+  }
+  /** Ruta y unidad que Coordinación le asignó hoy al conductor. */
+  getTodayAssignment(driverId: string): Promise<ApiResult<{ route: Route; bus: Bus } | undefined>> {
+    return run(() => this.catalog.todayFor(driverId));
+  }
+  getProfile(driverId: string): Promise<ApiResult<DriverProfile>> {
+    return run(async () => {
+      const p = await this.catalog.driverProfile(driverId);
+      if (!p) throw new DomainError('NOT_DRIVER', 'Conductor no encontrado.');
+      return p;
+    });
   }
   startTrip(driver: User, busId: string, routeId: string): Promise<ApiResult<Trip>> {
     return run(() => this.driver.startTrip(driver, busId, routeId));

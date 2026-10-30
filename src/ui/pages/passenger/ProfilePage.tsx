@@ -46,7 +46,7 @@ export function ProfilePage() {
       <main className="px-margin pt-4 flex flex-col gap-space-md">
         {/* Tarjeta de información de usuario */}
         <div className="bg-surface-card rounded-3xl p-5 shadow-level-1 border border-outline-variant/30 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-headline-md font-bold shadow-md shrink-0">
+          <div className="w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center text-headline-md font-bold shadow-md shrink-0">
             {initials(user.fullName)}
           </div>
           <div className="min-w-0 flex-1">
@@ -136,10 +136,10 @@ export function ProfilePage() {
             className="bg-surface-card p-4 rounded-2xl shadow-level-1 border border-outline-variant/40 flex flex-col justify-between items-start text-left min-h-[148px] active:scale-[0.98] transition-all hover:shadow-md group"
           >
             <div className="flex items-center justify-between w-full">
-              <div className="w-11 h-11 rounded-[12px] bg-primary text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+              <div className="w-11 h-11 rounded-[12px] bg-primary text-on-primary flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                 <Icon name="add_road" className="text-[24px]" />
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-label-sm font-bold border border-emerald-300 flex items-center gap-0.5">
+              <span className="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-sm font-bold border border-secondary/30 flex items-center gap-0.5">
                 <Icon name="add" className="text-[12px]" /> Paradas
               </span>
             </div>
@@ -260,7 +260,7 @@ function StopsDialog({
         <button
           type="button"
           onClick={save}
-          className="w-full h-12 rounded-full bg-primary text-white text-label-lg font-bold shadow-md active:scale-[0.985] transition-transform"
+          className="w-full h-12 rounded-full bg-primary text-on-primary text-label-lg font-bold shadow-md active:scale-[0.985] transition-transform"
         >
           Guardar paradas
         </button>

@@ -6,7 +6,7 @@ interface SessionValue {
   user: User | undefined;
   ready: boolean;
   loginPassenger: (email: string, password: string) => Promise<string | undefined>;
-  loginDriver: (email: string, pin: string) => Promise<{ user?: User; error?: string }>;
+  loginDriver: (email: string, password: string) => Promise<{ user?: User; error?: string }>;
   logout: () => void;
 }
 
