@@ -8,7 +8,7 @@ import { useSession } from '../../session/SessionContext';
 import { ThemeToggle } from '../../theme/ThemeContext';
 
 const DEMO_EMAIL = 'coordinacion@bustrack.edu';
-const DEMO_PASSWORD = 'coord123';
+const DEMO_PASSWORD = 'coordinacion2026';
 
 /**
  * Pantalla "Inicio de sesión de Coordinación". Viene rellena con la cuenta de demo (entrada rápida);

@@ -105,11 +105,11 @@ export function createSeed(now: number) {
 
   const credentials: Credential[] = [
     { email: 'diego@espol.edu.ec', secret: 'demo1234', userId: 'user-diego' },
-    { email: 'carlos.mendoza@bustrack.edu', secret: 'conductor123', userId: 'user-carlos' },
-    { email: 'ana.torres@bustrack.edu', secret: 'conductor123', userId: 'user-ana' },
-    { email: 'luis.paredes@bustrack.edu', secret: 'conductor123', userId: 'user-luis' },
-    { email: 'jorge.salazar@bustrack.edu', secret: 'conductor123', userId: 'user-jorge' },
-    { email: 'coordinacion@bustrack.edu', secret: 'coord123', userId: 'user-coord' },
+    { email: 'carlos.mendoza@bustrack.edu', secret: 'conductor2026', userId: 'user-carlos' },
+    { email: 'ana.torres@bustrack.edu', secret: 'conductor2026', userId: 'user-ana' },
+    { email: 'luis.paredes@bustrack.edu', secret: 'conductor2026', userId: 'user-luis' },
+    { email: 'jorge.salazar@bustrack.edu', secret: 'conductor2026', userId: 'user-jorge' },
+    { email: 'coordinacion@bustrack.edu', secret: 'coordinacion2026', userId: 'user-coord' },
     { email: 'admin@bustrack.edu', secret: 'admin', userId: 'user-admin' },
   ];
 

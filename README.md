@@ -21,11 +21,11 @@ Fuentes e íconos van empaquetados: funciona sin internet.
 | Rol | Usuario | Clave |
 |---|---|---|
 | Pasajero (Diego) | `diego@espol.edu.ec` | `demo1234` |
-| Conductor (Carlos, Ruta 4 hoy) | `carlos.mendoza@bustrack.edu` | `conductor123` |
-| Conductora (Ana) | `ana.torres@bustrack.edu` | `conductor123` |
-| Conductor (Luis) | `luis.paredes@bustrack.edu` | `conductor123` |
-| Conductor (Jorge, de reserva) | `jorge.salazar@bustrack.edu` | `conductor123` |
-| Coordinación | `coordinacion@bustrack.edu` | `coord123` |
+| Conductor (Carlos, Ruta 4 hoy) | `carlos.mendoza@bustrack.edu` | `conductor2026` |
+| Conductora (Ana) | `ana.torres@bustrack.edu` | `conductor2026` |
+| Conductor (Luis) | `luis.paredes@bustrack.edu` | `conductor2026` |
+| Conductor (Jorge, de reserva) | `jorge.salazar@bustrack.edu` | `conductor2026` |
+| Coordinación | `coordinacion@bustrack.edu` | `coordinacion2026` |
 | Admin (solo API, sin UI) | `admin@bustrack.edu` | `admin` |
 
 La pantalla de inicio (`/`) entra directo con cualquiera de los dos roles. La programación (qué conductor y qué bus cubren cada ruta cada día) la edita Coordinación en `/coordinador/planificador`, por día o para toda la semana; al entrar, el conductor recibe la ruta y el bus que le tocan hoy.

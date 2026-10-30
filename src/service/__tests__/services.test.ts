@@ -164,7 +164,7 @@ describe('Viaje completo del pasajero', () => {
 describe('Rutas y perfil del conductor', () => {
   it('el conductor entra con correo y contraseña (ya no con PIN)', async () => {
     const app = createApp(() => T0);
-    expect((await app.auth.loginDriver('carlos.mendoza@bustrack.edu', 'conductor123')).ok).toBe(true);
+    expect((await app.auth.loginDriver('carlos.mendoza@bustrack.edu', 'conductor2026')).ok).toBe(true);
     expect((await app.auth.loginDriver('carlos.mendoza@bustrack.edu', '4821')).ok).toBe(false);
   });
 
@@ -226,8 +226,8 @@ describe('Planificador de Coordinación', () => {
 
   it('el coordinador entra con su correo y contraseña', async () => {
     const app = createApp(() => T0);
-    expect((await app.auth.loginCoordinator('coordinacion@bustrack.edu', 'coord123')).ok).toBe(true);
-    expect((await app.auth.loginCoordinator('carlos.mendoza@bustrack.edu', 'conductor123')).ok).toBe(false);
+    expect((await app.auth.loginCoordinator('coordinacion@bustrack.edu', 'coordinacion2026')).ok).toBe(true);
+    expect((await app.auth.loginCoordinator('carlos.mendoza@bustrack.edu', 'conductor2026')).ok).toBe(false);
   });
 
   it('el plan trae conductores, buses y la programación de los 7 días', async () => {

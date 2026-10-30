@@ -13,7 +13,7 @@ export function DriverLoginPage() {
   const { toast } = useToasts();
   const navigate = useNavigate();
   const [email, setEmail] = useState('carlos.mendoza@bustrack.edu');
-  const [password, setPassword] = useState('conductor123');
+  const [password, setPassword] = useState('conductor2026');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -126,7 +126,7 @@ export function DriverLoginPage() {
                 Contraseña
               </label>
               <span className="text-label-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                Demo: conductor123
+                Demo: conductor2026
               </span>
             </div>
             <div className="relative flex items-center">
